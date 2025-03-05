@@ -44,14 +44,16 @@ jobs:
 
     # 任务步骤
     steps:
-      # 第一步：检出代码
+      # 第一步：检出代码并获取完整历史记录
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # 获取完整git历史记录
 
       # 第二步：获取最新tag
       - name: Get latest tag
         id: get_tag # 步骤ID
         run: | # 执行命令
-          LATEST_TAG=$(git describe --tags --abbrev=0 || echo "v0.0.0")
+          LATEST_TAG=$(git tag -l --sort=-v:refname | head -n 1 || echo "v0.0.0")
           echo "latest_tag=$LATEST_TAG" >> $GITHUB_OUTPUT
 
       # 第三步：版本号递增
@@ -68,8 +70,8 @@ jobs:
             FEAT=0
             FIX=0
           elif [ "${{ inputs.version_type }}" == "feat" ]; then
-            MINOR=$((FEAT + 1))
-            FEAT=0
+            FEAT=$((FEAT + 1))
+            FIX=0
           else
             FIX=$((FIX + 1))
           fi
@@ -80,5 +82,7 @@ jobs:
       # 第四步：创建新tag
       - name: Create new tag
         run: | # 执行命令
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git tag ${{ steps.increment_version.outputs.new_version }}
           git push origin ${{ steps.increment_version.outputs.new_version }}
