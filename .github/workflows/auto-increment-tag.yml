@@ -24,8 +24,12 @@ on:
       version_type:
         description: "Version increment type (major, feat, fix)"
         required: true
-        type: string
+        type: choice
         default: "fix"
+        options:
+          - fix
+          - feat
+          - major
 
 # 定义任务
 jobs:
