@@ -1,6 +1,6 @@
 # workflows
 
-公共工作流仓库
+## 公共工作流仓库
 
 ### 1. Auto Increment Tag
 
@@ -20,6 +20,14 @@ tag 版本号自增
 
 统计部署版本情况
 
-#### Todo List
+## Dev
 
-1. 通知机器人部署情况
+```
+act --container-architecture linux/amd64 -j increment-tag
+act --container-architecture linux/amd64 -j stats
+act --container-architecture linux/amd64 -j upload
+```
+
+## Todo List
+
+###1. 通知机器人部署情况
