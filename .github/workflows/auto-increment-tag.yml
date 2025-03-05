@@ -1,0 +1,90 @@
+# 工作流名称：tag版本号自增
+name: Auto Increment Tag
+
+on:
+  # 被其他工作流调用
+  workflow_call:
+    # 定义输入参数
+    inputs:
+      version_type:
+        description: "Version increment type (major, feat, fix)"
+        required: true
+        type: string
+        default: "fix"
+    # 定义输出参数
+    outputs:
+      new_version:
+        description: "The new version after increment"
+        value: ${{ jobs.increment-tag.outputs.new_version }}
+
+  # 手动触发
+  workflow_dispatch:
+    # 定义输入参数
+    inputs:
+      version_type:
+        description: "Version increment type (major, feat, fix)"
+        required: true
+        type: string
+        default: "fix"
+
+# 定义任务
+jobs:
+  # 任务名称：increment-tag
+  increment-tag:
+    # 运行环境：最新版Ubuntu
+    runs-on: ubuntu-latest
+
+    # 定义输出变量
+    outputs:
+      new_version: ${{ steps.increment_version.outputs.new_version }}
+
+    # 任务步骤
+    steps:
+      # 第一步：检出代码
+      - uses: actions/checkout@v3
+
+      # 第二步：获取最新tag
+      - name: Get latest tag
+        id: get_tag # 步骤ID
+        run: | # 执行命令
+          # 获取最新的tag
+          LATEST_TAG=$(git describe --tags --abbrev=0)
+          # 将最新tag输出到环境变量
+          echo "latest_tag=$LATEST_TAG" >> $GITHUB_OUTPUT
+
+      # 第三步：版本号递增
+      - name: Increment version
+        id: increment_version # 步骤ID
+        run: | # 执行命令
+          # 去掉tag中的v前缀
+          VERSION=${LATEST_TAG#v}
+          # 获取主版本号
+          MAJOR=$(echo $VERSION | cut -d. -f1 || echo 0)
+          # 获取次版本号
+          FEAT=$(echo $VERSION | cut -d. -f2 || echo 0)
+          # 获取修订号
+          FIX=$(echo $VERSION | cut -d. -f3 || echo 0)
+
+          if [ "${{ inputs.version_type }}" == "major" ]; then
+            MAJOR=$((MAJOR + 1))
+            FEAT=0
+            FIX=0
+          elif [ "${{ inputs.version_type }}" == "feat" ]; then
+            MINOR=$((FEAT + 1))
+            FEAT=0
+          else
+            FIX=$((FIX + 1))
+          fi
+
+          # 组合新版本号
+          NEW_VERSION="v${MAJOR}.${FEAT}.${FIX}"
+          # 将新版本号输出到环境变量
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+
+      # 第四步：创建新tag
+      - name: Create new tag
+        run: | # 执行命令
+          # 创建新tag
+          git tag ${{ steps.increment_version.outputs.new_version }}
+          # 推送新tag到远程仓库
+          git push origin ${{ steps.increment_version.outputs.new_version }}

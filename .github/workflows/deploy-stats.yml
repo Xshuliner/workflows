@@ -1,0 +1,128 @@
+# 工作流名称：部署统计
+name: Deploy Statistics
+
+on:
+  # 被其他工作流调用
+  workflow_call:
+    # 定义输入参数
+    inputs:
+      repository:
+        description: "github.repository"
+        required: true
+        type: string
+        default: "--"
+
+      project_name:
+        description: "github.event.repository.name"
+        required: true
+        type: string
+        default: "--"
+
+      release_number:
+        description: "Release number"
+        required: true
+        type: string
+        default: "--"
+
+      version:
+        description: "Version"
+        required: true
+        type: string
+        default: "--"
+
+      env:
+        description: "Environment type (PROD, UAT)"
+        required: true
+        type: string
+        default: "--"
+
+  # 手动触发
+  workflow_dispatch:
+    # 定义输入参数
+    inputs:
+      repository:
+        description: "github.repository"
+        required: true
+        type: string
+        default: "--"
+
+      project_name:
+        description: "github.event.repository.name"
+        required: true
+        type: string
+        default: "--"
+
+      release_number:
+        description: "Release number"
+        required: true
+        type: string
+        default: "--"
+
+      version:
+        description: "Version"
+        required: true
+        type: string
+        default: "--"
+
+      env:
+        description: "Environment type (PROD, UAT)"
+        required: true
+        type: string
+        default: "--"
+
+# 定义任务
+jobs:
+  # 任务名称：stats
+  stats:
+    # 运行环境：最新版Ubuntu
+    runs-on: ubuntu-latest
+
+    # 任务步骤
+    steps:
+      # 第一步：检出代码
+      - uses: actions/checkout@v3
+
+      # 第二步：获取部署信息
+      - name: Get deployment info
+        id: get_deploy # 步骤ID
+        run: | # 执行命令
+          # 使用GitHub CLI获取当前仓库的部署信息
+          DEPLOYMENTS=$(gh api repos/${{ github.repository }}/deployments)
+          # 将部署信息输出到环境变量
+          echo "deployments=$DEPLOYMENTS" >> $GITHUB_OUTPUT
+
+      # 第三步：生成报告
+      - name: Generate report
+        run: | # 执行命令
+          # 创建JSON格式的报告数据
+          REPORT_DATA=$(jq -n \
+            --arg project_name "${{ inputs.project_name }}" \
+            --arg release_number "${{ inputs.release_number }}" \
+            --arg version "${{ inputs.version }}" \
+            --arg env "${{ inputs.env }}" \
+            --arg actor "${{ github.actor }}" \
+            --argjson deployments "${{ steps.get_deploy.outputs.deployments }}" \
+            '{
+              project_name: $project_name,
+              release_number: $release_number,
+              version: $version,
+              environment: $env,
+              actor: $actor,
+              deployments: $deployments
+            }')
+
+          # 根据环境生成不同的报告文件名
+          REPORT_FILE="report_${{ inputs.env }}.txt"
+
+          # 将JSON数据写入报告文件
+          echo "$REPORT_DATA" > $REPORT_FILE
+
+      # 第四步：上传报告
+      - name: Upload report
+        # 使用上传artifact的action
+        uses: actions/upload-artifact@v3
+        with:
+          # 设置artifact名称为deploy-report-{env}
+          name: deploy-report-${{ inputs.env }}
+          # 指定要上传的文件路径
+          path: report_${{ inputs.env }}.txt
