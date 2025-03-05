@@ -51,22 +51,16 @@ jobs:
       - name: Get latest tag
         id: get_tag # 步骤ID
         run: | # 执行命令
-          # 获取最新的tag，如果没有tag则使用v0.0.0
           LATEST_TAG=$(git describe --tags --abbrev=0 || echo "v0.0.0")
-          # 将最新tag输出到环境变量
           echo "latest_tag=$LATEST_TAG" >> $GITHUB_OUTPUT
 
       # 第三步：版本号递增
       - name: Increment version
         id: increment_version # 步骤ID
         run: | # 执行命令
-          # 去掉tag中的v前缀
           VERSION=${LATEST_TAG#v}
-          # 获取主版本号
           MAJOR=$(echo $VERSION | cut -d. -f1 || echo 0)
-          # 获取次版本号
           FEAT=$(echo $VERSION | cut -d. -f2 || echo 0)
-          # 获取修订号
           FIX=$(echo $VERSION | cut -d. -f3 || echo 0)
 
           if [ "${{ inputs.version_type }}" == "major" ]; then
@@ -80,15 +74,11 @@ jobs:
             FIX=$((FIX + 1))
           fi
 
-          # 组合新版本号
           NEW_VERSION="v${MAJOR}.${FEAT}.${FIX}"
-          # 将新版本号输出到环境变量
           echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
 
       # 第四步：创建新tag
       - name: Create new tag
         run: | # 执行命令
-          # 创建新tag
           git tag ${{ steps.increment_version.outputs.new_version }}
-          # 推送新tag到远程仓库
           git push origin ${{ steps.increment_version.outputs.new_version }}
