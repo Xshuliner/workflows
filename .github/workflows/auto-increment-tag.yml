@@ -1,25 +1,20 @@
-# 工作流名称：tag版本号自增
 name: Auto Increment Tag
 
 on:
-  # 被其他工作流调用
   workflow_call:
-    # 定义输入参数
     inputs:
       version_type:
         description: "Version increment type (major, feat, fix)"
         required: true
         type: string
         default: "fix"
-    # 定义输出参数
+
     outputs:
       new_version:
         description: "The new version after increment"
         value: ${{ jobs.increment-tag.outputs.new_version }}
 
-  # 手动触发
   workflow_dispatch:
-    # 定义输入参数
     inputs:
       version_type:
         description: "Version increment type (major, feat, fix)"
@@ -31,35 +26,28 @@ on:
           - feat
           - major
 
-# 定义任务
 jobs:
-  # 任务名称：increment-tag
   increment-tag:
-    # 运行环境：最新版Ubuntu
     runs-on: ubuntu-latest
 
-    # 定义输出变量
     outputs:
       new_version: ${{ steps.increment_version.outputs.new_version }}
 
-    # 任务步骤
     steps:
-      # 第一步：检出代码并获取完整历史记录
       - uses: actions/checkout@v3
         with:
-          fetch-depth: 0 # 获取完整git历史记录
+          fetch-depth: 0 
 
-      # 第二步：获取最新tag
       - name: Get latest tag
-        id: get_tag # 步骤ID
-        run: | # 执行命令
+        id: get_tag
+        run: |
           LATEST_TAG=$(git tag -l --sort=-v:refname | head -n 1 || echo "v0.0.0")
           echo "latest_tag=$LATEST_TAG" >> $GITHUB_OUTPUT
+        shell: /usr/bin/bash -e {0}
 
-      # 第三步：版本号递增
       - name: Increment version
-        id: increment_version # 步骤ID
-        run: | # 执行命令
+        id: increment_version
+        run: |
           VERSION=${LATEST_TAG#v}
           MAJOR=$(echo $VERSION | cut -d. -f1 || echo 0)
           FEAT=$(echo $VERSION | cut -d. -f2 || echo 0)
@@ -79,9 +67,8 @@ jobs:
           NEW_VERSION="v${MAJOR}.${FEAT}.${FIX}"
           echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
 
-      # 第四步：创建新tag
       - name: Create new tag
-        run: | # 执行命令
+        run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git tag ${{ steps.increment_version.outputs.new_version }}

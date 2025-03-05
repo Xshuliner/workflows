@@ -1,10 +1,7 @@
-# 工作流名称：部署统计
 name: Deploy Statistics
 
 on:
-  # 被其他工作流调用
   workflow_call:
-    # 定义输入参数
     inputs:
       repository:
         description: "github.repository"
@@ -36,9 +33,7 @@ on:
         type: string
         default: "--"
 
-  # 手动触发
   workflow_dispatch:
-    # 定义输入参数
     inputs:
       repository:
         description: "github.repository"
@@ -70,28 +65,21 @@ on:
         type: string
         default: "--"
 
-# 定义任务
 jobs:
-  # 任务名称：stats
   stats:
-    # 运行环境：最新版Ubuntu
     runs-on: ubuntu-latest
 
-    # 任务步骤
     steps:
-      # 第一步：检出代码
       - uses: actions/checkout@v3
 
-      # 第二步：获取部署信息
       - name: Get deployment info
-        id: get_deploy # 步骤ID
-        run: | # 执行命令
+        id: get_deploy
+        run: |
           DEPLOYMENTS=$(gh api repos/${{ github.repository }}/deployments)
           echo "deployments=$DEPLOYMENTS" >> $GITHUB_OUTPUT
 
-      # 第三步：生成报告
       - name: Generate report
-        run: | # 执行命令
+        run: |
           REPORT_DATA=$(jq -n \
             --arg project_name "${{ inputs.project_name }}" \
             --arg release_number "${{ inputs.release_number }}" \
@@ -112,12 +100,8 @@ jobs:
 
           echo "$REPORT_DATA" > $REPORT_FILE
 
-      # 第四步：上传报告
       - name: Upload report
-        # 使用上传artifact的action
         uses: actions/upload-artifact@v3
         with:
-          # 设置artifact名称为deploy-report-{env}
           name: deploy-report-${{ inputs.env }}
-          # 指定要上传的文件路径
           path: report_${{ inputs.env }}.txt

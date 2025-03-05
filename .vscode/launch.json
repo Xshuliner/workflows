@@ -1,0 +1,29 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug Auto Increment Tag",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/.github/workflows/auto-increment-tag.yml",
+      "args": ["-j", "build"],
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Debug Deploy Statistics",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/.github/workflows/deploy-stats.yml",
+      "args": ["-j", "build"],
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Debug Upload Html",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/.github/workflows/upload-html.yml",
+      "args": ["-j", "build"],
+      "console": "integratedTerminal"
+    }
+  ]
+}
