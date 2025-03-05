@@ -51,8 +51,8 @@ jobs:
       - name: Get latest tag
         id: get_tag # 步骤ID
         run: | # 执行命令
-          # 获取最新的tag
-          LATEST_TAG=$(git describe --tags --abbrev=0)
+          # 获取最新的tag，如果没有tag则使用v0.0.0
+          LATEST_TAG=$(git describe --tags --abbrev=0 || echo "v0.0.0")
           # 将最新tag输出到环境变量
           echo "latest_tag=$LATEST_TAG" >> $GITHUB_OUTPUT
 
