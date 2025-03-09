@@ -88,6 +88,8 @@ jobs:
 
       - name: Get deployment info
         id: get_deploy
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           echo "=== [Get deployment info][params] repository: ${{inputs.repository}} ==="
 
