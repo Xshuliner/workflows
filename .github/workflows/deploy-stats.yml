@@ -41,31 +41,31 @@ on:
         description: "github.repository"
         required: true
         type: string
-        default: "--"
+        default: "Xshuliner/project-status"
 
       project_name:
         description: "github.event.repository.name"
         required: true
         type: string
-        default: "--"
+        default: "project-status"
 
       release_number:
         description: "Release number"
         required: true
         type: string
-        default: "--"
+        default: "#98"
 
       version:
         description: "Version"
         required: true
         type: string
-        default: "--"
+        default: "v0.1.2"
 
       env:
         description: "Environment type (PROD, UAT)"
         required: true
         type: string
-        default: "--"
+        default: "PROD"
 
 jobs:
   stats:
