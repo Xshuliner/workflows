@@ -11,30 +11,6 @@ on:
         type: string
         default: "--"
 
-      repository:
-        description: "github.repository"
-        required: true
-        type: string
-        default: "--"
-
-      project_name:
-        description: "github.event.repository.name"
-        required: true
-        type: string
-        default: "--"
-
-      ref_name:
-        description: "github.ref_name"
-        required: true
-        type: string
-        default: "--"
-
-      release_number:
-        description: "Release number"
-        required: true
-        type: string
-        default: "--"
-
       version:
         description: "Version"
         required: true
@@ -54,30 +30,6 @@ on:
         required: true
         type: string
         default: "--"
-
-      repository:
-        description: "github.repository"
-        required: true
-        type: string
-        default: "Xshuliner/project-status"
-
-      project_name:
-        description: "github.event.repository.name"
-        required: true
-        type: string
-        default: "project-status"
-
-      ref_name:
-        description: "github.ref_name"
-        required: true
-        type: string
-        default: "master"
-
-      release_number:
-        description: "Release number"
-        required: true
-        type: string
-        default: "#98"
 
       version:
         description: "Version"
@@ -100,49 +52,45 @@ jobs:
 
       - name: Console Params
         run: |
-          echo "=== [Get deployment info][params] gh_token: ${{inputs.gh_token}} ==="
-          echo "=== [Console Params][params] repository: ${{inputs.repository}} ==="
-          echo "=== [Console Params][params] project_name: ${{inputs.project_name}} ==="
-          echo "=== [Console Params][params] ref_name: ${{inputs.ref_name}} ==="
-          echo "=== [Console Params][params] release_number: ${{inputs.release_number}} ==="
+          RELEASE_NUMBER = $(echo ${{ github.ref }} | cut -d '/' -f 4)
+          echo "=== [Console Params][params] gh_token: ${{inputs.gh_token}} ==="
+          echo "=== [Console Params][params] repository: ${{github.repository}} ==="
+          echo "=== [Console Params][params] project_name: ${{github.event.repository.name}} ==="
+          echo "=== [Console Params][params] ref_name: ${{github.ref_name}} ==="
+          echo "=== [Console Params][params] release_number: $RELEASE_NUMBER ==="
           echo "=== [Console Params][params] version: ${{inputs.version}} ==="
           echo "=== [Console Params][params] env: ${{inputs.env}} ==="
           echo "=== [Console Params][params] actor: ${{github.actor}} ==="
-
-      - name: Install GitHub CLI
-        run: |
-          sudo apt-get update
-          sudo apt-get install gh
 
       - name: Get deployment info
         id: get_deploy
         env:
           GH_TOKEN: ${{ inputs.gh_token }}
         run: |
-          echo "=== [Get deployment info][params] repository: ${{inputs.repository}} ==="
+          echo "=== [Get deployment info][params] repository: ${{github.repository}} ==="
           echo "=== [Get deployment info][params] actor: ${{github.actor}} ==="
           echo "=== [Get deployment info][params] gh_token: ${{inputs.gh_token}} ==="
 
-          gh auth status
-          DEPLOYMENTS=$(gh api repos/${{ inputs.repository }}/deployments)
+          DEPLOYMENTS=$(gh api repos/${{ github.repository }}/deployments)
           echo "deployments=$DEPLOYMENTS" >> $GITHUB_OUTPUT
 
           echo "=== [Get deployment info][result] NEW_VERSION: $NEW_VERSION ==="
 
       - name: Generate report
         run: |
-          echo "=== [Generate report][params] project_name: ${{inputs.project_name}} ==="
-          echo "=== [Generate report][params] ref_name: ${{inputs.ref_name}} ==="
-          echo "=== [Generate report][params] release_number: ${{inputs.release_number}} ==="
+          RELEASE_NUMBER = $(echo ${{ github.ref }} | cut -d '/' -f 4)
+          echo "=== [Generate report][params] project_name: ${{github.event.repository.name}} ==="
+          echo "=== [Generate report][params] ref_name: ${{github.ref_name}} ==="
+          echo "=== [Generate report][params] release_number: $RELEASE_NUMBER ==="
           echo "=== [Generate report][params] version: ${{inputs.version}} ==="
           echo "=== [Generate report][params] env: ${{inputs.env}} ==="
           echo "=== [Generate report][params] actor: ${{github.actor}} ==="
           echo "=== [Generate report][params] deployments: ${{steps.get_deploy.outputs.deployments}} ==="
 
           REPORT_DATA=$(jq -n \
-            --arg project_name "${{ inputs.project_name }}" \
-            --arg ref_name "${{ inputs.ref_name }}" \
-            --arg release_number "${{ inputs.release_number }}" \
+            --arg project_name "${{ github.event.repository.name }}" \
+            --arg ref_name "${{ github.ref_name }}" \
+            --arg release_number $RELEASE_NUMBER \
             --arg version "${{ inputs.version }}" \
             --arg env "${{ inputs.env }}" \
             --arg actor "${{ github.actor }}" \
