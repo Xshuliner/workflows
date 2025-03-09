@@ -38,19 +38,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Console Params
-        run: |
-          RELEASE_NUMBER=$(echo ${{ github.ref }} | cut -d '/' -f 4)
-
-          echo "=== [Console Params][params] gh_token: ${{github.token}} ==="
-          echo "=== [Console Params][params] repository: ${{github.repository}} ==="
-          echo "=== [Console Params][params] project_name: ${{github.event.repository.name}} ==="
-          echo "=== [Console Params][params] ref_name: ${{github.ref_name}} ==="
-          echo "=== [Console Params][params] release_number: $RELEASE_NUMBER ==="
-          echo "=== [Console Params][params] version: ${{inputs.version}} ==="
-          echo "=== [Console Params][params] env: ${{inputs.env}} ==="
-          echo "=== [Console Params][params] actor: ${{github.actor}} ==="
-
       - name: Get deployment info
         id: get_deploy
         env:
@@ -58,7 +45,7 @@ jobs:
         run: |
           echo "=== [Get deployment info][params] repository: ${{github.repository}} ==="
 
-          DEPLOYMENTS=$(gh api repos/${{ github.repository }}/deployments)
+          DEPLOYMENTS=$(gh api repos/${{ github.repository }}/deployments?state=all)
           echo "deployments=$DEPLOYMENTS" >> $GITHUB_OUTPUT
 
           echo "=== [Get deployment info][result] DEPLOYMENTS: $DEPLOYMENTS ==="
@@ -69,27 +56,29 @@ jobs:
 
           echo "=== [Generate report][params] project_name: ${{github.event.repository.name}} ==="
           echo "=== [Generate report][params] ref_name: ${{github.ref_name}} ==="
+          echo "=== [Console Params][params] github_ref: ${{ github.ref }} ==="
+          echo "=== [Generate report][params] actor: ${{github.actor}} ==="
           echo "=== [Generate report][params] release_number: $RELEASE_NUMBER ==="
           echo "=== [Generate report][params] version: ${{inputs.version}} ==="
           echo "=== [Generate report][params] env: ${{inputs.env}} ==="
-          echo "=== [Generate report][params] actor: ${{github.actor}} ==="
-          echo "=== [Generate report][params] deployments: ${{steps.get_deploy.outputs.deployments}} ==="
 
           REPORT_DATA=$(jq -n \
             --arg project_name "${{ github.event.repository.name }}" \
             --arg ref_name "${{ github.ref_name }}" \
+            --arg actor "${{ github.actor }}" \
             --arg release_number "$RELEASE_NUMBER" \
             --arg version "${{ inputs.version }}" \
             --arg env "${{ inputs.env }}" \
-            --arg actor "${{ github.actor }}" \
-            --argjson deployments "${{ steps.get_deploy.outputs.deployments }}" \
+            --arg last_commit_time "$(git log -1 --format=%cd --date=unix)" \
+            --arg deploy_time "$(date -u +%s)" \
             '{
               project_name: $project_name,
               release_number: $release_number,
               version: $version,
               environment: $env,
               actor: $actor,
-              deployments: $deployments
+              last_commit_time: $last_commit_time,
+              deploy_time: $deploy_time
             }')
 
           REPORT_FILE="report_${{ inputs.env }}.txt"
