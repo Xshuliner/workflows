@@ -98,12 +98,25 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Console Params
+        run: |
+          echo "=== [Get deployment info][params] gh_token: ${{inputs.gh_token}} ==="
+          echo "=== [Console Params][params] repository: ${{inputs.repository}} ==="
+          echo "=== [Console Params][params] project_name: ${{inputs.project_name}} ==="
+          echo "=== [Console Params][params] ref_name: ${{inputs.ref_name}} ==="
+          echo "=== [Console Params][params] release_number: ${{inputs.release_number}} ==="
+          echo "=== [Console Params][params] version: ${{inputs.version}} ==="
+          echo "=== [Console Params][params] env: ${{inputs.env}} ==="
+          echo "=== [Console Params][params] actor: ${{github.actor}} ==="
+
       - name: Get deployment info
         id: get_deploy
         env:
-          GH_TOKEN: ${{ inputs.gh_token }} # 使用传入的 GH_TOKEN
+          GH_TOKEN: ${{ inputs.gh_token }}
         run: |
           echo "=== [Get deployment info][params] repository: ${{inputs.repository}} ==="
+          echo "=== [Get deployment info][params] actor: ${{github.actor}} ==="
+          echo "=== [Get deployment info][params] gh_token: ${{inputs.gh_token}} ==="
 
           DEPLOYMENTS=$(gh api repos/${{ inputs.repository }}/deployments)
           echo "deployments=$DEPLOYMENTS" >> $GITHUB_OUTPUT
