@@ -46,13 +46,13 @@ jobs:
           LATEST_TAG=$(git tag -l --sort=-v:refname | head -n 1 || echo "v0.0.0")
           echo "latest_tag=$LATEST_TAG" >> $GITHUB_OUTPUT
 
-          echo "<<< Get latest tag result: LATEST_TAG = $LATEST_TAG >>>"
+          echo "=== [Get latest tag][result] LATEST_TAG: $LATEST_TAG ==="
         shell: bash
 
       - name: Increment version
         id: increment_version
         run: |
-          echo "<<< Increment version params: version_type = ${{inputs.version_type}} >>>"
+          echo "=== [Increment version][params] version_type: ${{inputs.version_type}} ==="
 
           VERSION=$(echo ${{ steps.get_tag.outputs.latest_tag }} | sed 's/^v//;s/v//g')
           MAJOR=$(echo $VERSION | cut -d. -f1 || echo 0)
@@ -73,8 +73,7 @@ jobs:
           NEW_VERSION="v${MAJOR}.${FEAT}.${FIX}"
           echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
 
-          echo "<<< Increment version end $NEW_VERSION = $MAJOR = $FEAT = $FIX >>>"
-          echo "<<< Increment version result: NEW_VERSION = $NEW_VERSION >>>"
+          echo "=== [Increment version][result] NEW_VERSION: $NEW_VERSION ==="
       - name: Create new tag
         run: |
           git config --global user.name "github-actions[bot]"
