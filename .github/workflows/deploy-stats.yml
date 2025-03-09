@@ -5,6 +5,12 @@ run-name: Deploy Statistics
 on:
   workflow_call:
     inputs:
+      gh_token:
+        description: "github.token"
+        required: true
+        type: string
+        default: "--"
+
       repository:
         description: "github.repository"
         required: true
@@ -43,6 +49,12 @@ on:
 
   workflow_dispatch:
     inputs:
+      gh_token:
+        description: "github.token"
+        required: true
+        type: string
+        default: "--"
+
       repository:
         description: "github.repository"
         required: true
@@ -89,7 +101,7 @@ jobs:
       - name: Get deployment info
         id: get_deploy
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ inputs.gh_token }} # 使用传入的 GH_TOKEN
         run: |
           echo "=== [Get deployment info][params] repository: ${{inputs.repository}} ==="
 
