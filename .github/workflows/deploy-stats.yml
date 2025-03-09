@@ -31,7 +31,6 @@ on:
         type: string
         default: "PROD"
 
-# RELEASE_NUMBER = $(echo ${{ github.ref }} | cut -d '/' -f 4)
 jobs:
   stats:
     runs-on: ubuntu-latest
@@ -41,10 +40,13 @@ jobs:
 
       - name: Console Params
         run: |
+          RELEASE_NUMBER=$(echo ${{ github.ref }} | cut -d '/' -f 4)
+
           echo "=== [Console Params][params] gh_token: ${{github.token}} ==="
           echo "=== [Console Params][params] repository: ${{github.repository}} ==="
           echo "=== [Console Params][params] project_name: ${{github.event.repository.name}} ==="
           echo "=== [Console Params][params] ref_name: ${{github.ref_name}} ==="
+          echo "=== [Generate report][params] release_number: $RELEASE_NUMBER ==="
           echo "=== [Console Params][params] release_number: #11 ==="
           echo "=== [Console Params][params] version: ${{inputs.version}} ==="
           echo "=== [Console Params][params] env: ${{inputs.env}} ==="
@@ -60,14 +62,15 @@ jobs:
           DEPLOYMENTS=$(gh api repos/${{ github.repository }}/deployments)
           echo "deployments=$DEPLOYMENTS" >> $GITHUB_OUTPUT
 
-          echo "=== [Get deployment info][result] NEW_VERSION: $NEW_VERSION ==="
+          echo "=== [Get deployment info][result] DEPLOYMENTS: $DEPLOYMENTS ==="
 
       - name: Generate report
         run: |
-          RELEASE_NUMBER = $(echo ${{ github.ref }} | cut -d '/' -f 4)
+          RELEASE_NUMBER=$(echo ${{ github.ref }} | cut -d '/' -f 4)
+
           echo "=== [Generate report][params] project_name: ${{github.event.repository.name}} ==="
           echo "=== [Generate report][params] ref_name: ${{github.ref_name}} ==="
-          echo "=== [Generate report][params] release_number: #11 ==="
+          echo "=== [Generate report][params] release_number: $RELEASE_NUMBER ==="
           echo "=== [Generate report][params] version: ${{inputs.version}} ==="
           echo "=== [Generate report][params] env: ${{inputs.env}} ==="
           echo "=== [Generate report][params] actor: ${{github.actor}} ==="
@@ -76,7 +79,7 @@ jobs:
           REPORT_DATA=$(jq -n \
             --arg project_name "${{ github.event.repository.name }}" \
             --arg ref_name "${{ github.ref_name }}" \
-            --arg release_number #11 \
+            --arg release_number $RELEASE_NUMBER \
             --arg version "${{ inputs.version }}" \
             --arg env "${{ inputs.env }}" \
             --arg actor "${{ github.actor }}" \
