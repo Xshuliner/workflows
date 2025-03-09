@@ -5,12 +5,6 @@ run-name: Deploy Statistics
 on:
   workflow_call:
     inputs:
-      gh_token:
-        description: "github.token"
-        required: true
-        type: string
-        default: "--"
-
       version:
         description: "Version"
         required: true
@@ -25,12 +19,6 @@ on:
 
   workflow_dispatch:
     inputs:
-      gh_token:
-        description: "github.token"
-        required: true
-        type: string
-        default: "--"
-
       version:
         description: "Version"
         required: true
@@ -68,8 +56,6 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           echo "=== [Get deployment info][params] repository: ${{github.repository}} ==="
-          echo "=== [Get deployment info][params] actor: ${{github.actor}} ==="
-          echo "=== [Get deployment info][params] gh_token: ${{inputs.gh_token}} ==="
 
           DEPLOYMENTS=$(gh api repos/${{ github.repository }}/deployments)
           echo "deployments=$DEPLOYMENTS" >> $GITHUB_OUTPUT
