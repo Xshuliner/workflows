@@ -1,5 +1,7 @@
 name: Upload Html
 
+run-name: Upload Html
+
 on:
   workflow_call:
     inputs:

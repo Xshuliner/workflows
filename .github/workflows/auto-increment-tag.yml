@@ -1,5 +1,7 @@
 name: Auto Increment Tag
 
+run-name: Auto Increment Tag
+
 on:
   workflow_call:
     inputs:
@@ -46,7 +48,7 @@ jobs:
           if [ -z "$LATEST_TAG" ]; then
             LATEST_TAG="v0.0.0"
           fi
-          echo "latest_tag=$LATEST_TAG"
+          echo "latest_tag=$LATEST_TAG" >> $GITHUB_OUTPUT
           echo "=== Get latest tag end ==="
         shell: bash
 
@@ -54,7 +56,7 @@ jobs:
         id: increment_version
         run: |
           echo "=== Increment version start ==="
-          VERSION=${LATEST_TAG#v}
+          VERSION=${{ steps.get_tag.outputs.latest_tag }}
           MAJOR=$(echo $VERSION | cut -d. -f1 || echo 0)
           FEAT=$(echo $VERSION | cut -d. -f2 || echo 0)
           FIX=$(echo $VERSION | cut -d. -f3 || echo 0)

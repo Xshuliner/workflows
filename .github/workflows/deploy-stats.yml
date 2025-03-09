@@ -1,5 +1,7 @@
 name: Deploy Statistics
 
+run-name: Deploy Statistics
+
 on:
   workflow_call:
     inputs:
