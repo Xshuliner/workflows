@@ -53,7 +53,7 @@ jobs:
 
       - name: Console Params
         run: |
-          echo "=== [Console Params][params] gh_token: ${{inputs.gh_token}} ==="
+          echo "=== [Console Params][params] gh_token: ${{github.token}} ==="
           echo "=== [Console Params][params] repository: ${{github.repository}} ==="
           echo "=== [Console Params][params] project_name: ${{github.event.repository.name}} ==="
           echo "=== [Console Params][params] ref_name: ${{github.ref_name}} ==="
@@ -65,7 +65,7 @@ jobs:
       - name: Get deployment info
         id: get_deploy
         env:
-          GH_TOKEN: ${{ inputs.gh_token }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           echo "=== [Get deployment info][params] repository: ${{github.repository}} ==="
           echo "=== [Get deployment info][params] actor: ${{github.actor}} ==="
