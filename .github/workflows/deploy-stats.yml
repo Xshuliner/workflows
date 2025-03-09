@@ -78,7 +78,7 @@ jobs:
           REPORT_DATA=$(jq -n \
             --arg project_name "${{ github.event.repository.name }}" \
             --arg ref_name "${{ github.ref_name }}" \
-            --arg release_number $RELEASE_NUMBER \
+            --arg release_number "$RELEASE_NUMBER" \
             --arg version "${{ inputs.version }}" \
             --arg env "${{ inputs.env }}" \
             --arg actor "${{ github.actor }}" \
