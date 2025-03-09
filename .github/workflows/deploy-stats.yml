@@ -17,6 +17,12 @@ on:
         type: string
         default: "--"
 
+      ref_name:
+        description: "github.ref_name"
+        required: true
+        type: string
+        default: "--"
+
       release_number:
         description: "Release number"
         required: true
@@ -48,6 +54,12 @@ on:
         required: true
         type: string
         default: "project-status"
+
+      ref_name:
+        description: "github.ref_name"
+        required: true
+        type: string
+        default: "master"
 
       release_number:
         description: "Release number"
@@ -87,6 +99,7 @@ jobs:
       - name: Generate report
         run: |
           echo "=== [Generate report][params] project_name: ${{inputs.project_name}} ==="
+          echo "=== [Generate report][params] ref_name: ${{inputs.ref_name}} ==="
           echo "=== [Generate report][params] release_number: ${{inputs.release_number}} ==="
           echo "=== [Generate report][params] version: ${{inputs.version}} ==="
           echo "=== [Generate report][params] env: ${{inputs.env}} ==="
@@ -95,6 +108,7 @@ jobs:
 
           REPORT_DATA=$(jq -n \
             --arg project_name "${{ inputs.project_name }}" \
+            --arg ref_name "${{ inputs.ref_name }}" \
             --arg release_number "${{ inputs.release_number }}" \
             --arg version "${{ inputs.version }}" \
             --arg env "${{ inputs.env }}" \
