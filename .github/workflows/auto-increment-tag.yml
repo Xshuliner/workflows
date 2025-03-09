@@ -41,9 +41,12 @@ jobs:
       - name: Get latest tag
         id: get_tag
         run: |
-          LATEST_TAG=$(git tag -l --sort=-v:refname | head -n 1 || echo "v0.0.0")
+          LATEST_TAG=$(git tag -l --sort=-v:refname | head -n 1)
+          if [ -z "$LATEST_TAG" ]; then
+            LATEST_TAG="v0.0.0"
+          fi
           echo "latest_tag=$LATEST_TAG" >> $GITHUB_OUTPUT
-        shell: /usr/bin/bash -e {0}
+        shell: bash
 
       - name: Increment version
         id: increment_version
