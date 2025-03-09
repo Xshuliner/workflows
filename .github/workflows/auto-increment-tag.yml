@@ -50,7 +50,6 @@ jobs:
           echo "latest_tag=$LATEST_TAG" >> $GITHUB_OUTPUT
 
           echo "=== [Get latest tag][result] LATEST_TAG: $LATEST_TAG ==="
-        shell: bash
 
       - name: Increment version
         id: increment_version
@@ -77,6 +76,7 @@ jobs:
           echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
 
           echo "=== [Increment version][result] NEW_VERSION: $NEW_VERSION ==="
+
       - name: Create new tag
         run: |
           git config --global user.name "github-actions[bot]"

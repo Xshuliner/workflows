@@ -77,11 +77,22 @@ jobs:
       - name: Get deployment info
         id: get_deploy
         run: |
-          DEPLOYMENTS=$(gh api repos/${{ github.repository }}/deployments)
+          echo "=== [Get deployment info][params] repository: ${{inputs.repository}} ==="
+
+          DEPLOYMENTS=$(gh api repos/${{ inputs.repository }}/deployments)
           echo "deployments=$DEPLOYMENTS" >> $GITHUB_OUTPUT
+
+          echo "=== [Get deployment info][result] NEW_VERSION: $NEW_VERSION ==="
 
       - name: Generate report
         run: |
+          echo "=== [Generate report][params] project_name: ${{inputs.project_name}} ==="
+          echo "=== [Generate report][params] release_number: ${{inputs.release_number}} ==="
+          echo "=== [Generate report][params] version: ${{inputs.version}} ==="
+          echo "=== [Generate report][params] env: ${{inputs.env}} ==="
+          echo "=== [Generate report][params] actor: ${{github.actor}} ==="
+          echo "=== [Generate report][params] deployments: ${{steps.get_deploy.outputs.deployments}} ==="
+
           REPORT_DATA=$(jq -n \
             --arg project_name "${{ inputs.project_name }}" \
             --arg release_number "${{ inputs.release_number }}" \
@@ -101,6 +112,8 @@ jobs:
           REPORT_FILE="report_${{ inputs.env }}.txt"
 
           echo "$REPORT_DATA" > $REPORT_FILE
+
+          echo "=== [Get deployment info][result] REPORT_FILE: report_${{ inputs.env }}.txt ==="
 
       - name: Upload report
         uses: actions/upload-artifact@v3
