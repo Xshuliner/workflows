@@ -109,6 +109,11 @@ jobs:
           echo "=== [Console Params][params] env: ${{inputs.env}} ==="
           echo "=== [Console Params][params] actor: ${{github.actor}} ==="
 
+      - name: Install GitHub CLI
+        run: |
+          sudo apt-get update
+          sudo apt-get install gh
+
       - name: Get deployment info
         id: get_deploy
         env:
@@ -118,6 +123,7 @@ jobs:
           echo "=== [Get deployment info][params] actor: ${{github.actor}} ==="
           echo "=== [Get deployment info][params] gh_token: ${{inputs.gh_token}} ==="
 
+          gh auth status
           DEPLOYMENTS=$(gh api repos/${{ inputs.repository }}/deployments)
           echo "deployments=$DEPLOYMENTS" >> $GITHUB_OUTPUT
 
