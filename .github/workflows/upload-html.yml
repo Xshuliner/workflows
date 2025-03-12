@@ -64,15 +64,15 @@ jobs:
 
       - name: Console params
         run: |
-          echo "=== [Console params][params] env: ${{ github.event.inputs.source }} ==="
-          echo "=== [Console params][params] source: ${{ github.event.inputs.source }} ==="
-          echo "=== [Console params][params] rm: ${{ github.event.inputs.rm }} ==="
-          echo "=== [Console params][params] strip_components: ${{ github.event.inputs.strip_components }} ==="
+          echo "=== [Console params][params] env: ${{ inputs.env }} ==="
+          echo "=== [Console params][params] source: ${{ inputs.source }} ==="
+          echo "=== [Console params][params] rm: ${{ inputs.rm }} ==="
+          echo "=== [Console params][params] strip_components: ${{ inputs.strip_components }} ==="
           echo "=== [Console params][secrets] SSH_HOST: ${{ secrets.SSH_HOST }} ==="
           echo "=== [Console params][secrets] SSH_PORT: ${{ secrets.SSH_PORT }} ==="
           echo "=== [Console params][secrets] SSH_USERNAME: ${{ secrets.SSH_USERNAME }} ==="
           echo "=== [Console params][secrets] SSH_KEY: ${{ secrets.SSH_KEY }} ==="
-          echo "=== [Console params][repository_name] SSH_KEY: ${{ github.event.repository.name }} ==="
+          echo "=== [Console params][github] repository_name: ${{ github.event.repository.name }} ==="
 
       - name: Upload files
         uses: appleboy/scp-action@master
