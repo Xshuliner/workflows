@@ -13,19 +13,19 @@ on:
 
       source:
         description: "source for scp params"
-        required: false
+        required: true
         type: string
         default: "./dist/*"
 
       rm:
         description: "rm for scp params"
-        required: false
+        required: true
         type: boolean
         default: true
 
       strip_components:
         description: "strip_components for scp params"
-        required: false
+        required: true
         type: number
         default: 1
 
@@ -39,19 +39,19 @@ on:
 
       source:
         description: "source for scp params"
-        required: false
+        required: true
         type: string
         default: "./dist/*"
 
       rm:
         description: "rm for scp params"
-        required: false
+        required: true
         type: boolean
         default: true
 
       strip_components:
         description: "strip_components for scp params"
-        required: false
+        required: true
         type: number
         default: 1
 
