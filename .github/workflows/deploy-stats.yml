@@ -43,7 +43,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          echo "=== [Get deployment info][params] repository: ${{github.repository}} ==="
+          echo "=== [Get deployment info][params] repository: ${{ github.repository }} ==="
 
           DEPLOYMENTS=$(gh api repos/${{ github.repository }}/deployments?state=all)
           echo "deployments=$DEPLOYMENTS" >> $GITHUB_OUTPUT
@@ -54,13 +54,13 @@ jobs:
         run: |
           RELEASE_NUMBER=$(echo ${{ github.ref }} | cut -d '/' -f 4)
 
-          echo "=== [Generate report][params] project_name: ${{github.event.repository.name}} ==="
-          echo "=== [Generate report][params] ref_name: ${{github.ref_name}} ==="
+          echo "=== [Generate report][params] project_name: ${{ github.event.repository.name }} ==="
+          echo "=== [Generate report][params] ref_name: ${{ github.ref_name }} ==="
           echo "=== [Console Params][params] github_ref: ${{ github.ref }} ==="
-          echo "=== [Generate report][params] actor: ${{github.actor}} ==="
+          echo "=== [Generate report][params] actor: ${{ github.actor }} ==="
           echo "=== [Generate report][params] release_number: $RELEASE_NUMBER ==="
-          echo "=== [Generate report][params] version: ${{inputs.version}} ==="
-          echo "=== [Generate report][params] env: ${{inputs.env}} ==="
+          echo "=== [Generate report][params] version: ${{ inputs.version }} ==="
+          echo "=== [Generate report][params] env: ${{ inputs.env }} ==="
 
           REPORT_DATA=$(jq -n \
             --arg project_name "${{ github.event.repository.name }}" \

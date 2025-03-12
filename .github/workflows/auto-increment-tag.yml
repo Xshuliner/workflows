@@ -54,7 +54,7 @@ jobs:
       - name: Increment version
         id: increment_version
         run: |
-          echo "=== [Increment version][params] version_type: ${{inputs.version_type}} ==="
+          echo "=== [Increment version][params] version_type: ${{ inputs.version_type }} ==="
 
           VERSION=$(echo ${{ steps.get_tag.outputs.latest_tag }} | sed 's/^v//;s/v//g')
           MAJOR=$(echo $VERSION | cut -d. -f1 || echo 0)

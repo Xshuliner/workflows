@@ -62,6 +62,22 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Console params
+        run: |
+          echo "=== [Console params][params] env: ${{ github.event.inputs.source }} ==="
+          echo "=== [Console params][params] source: ${{ github.event.inputs.source }} ==="
+          echo "=== [Console params][params] rm: ${{ github.event.inputs.rm }} ==="
+          echo "=== [Console params][params] strip_components: ${{ github.event.inputs.strip_components }} ==="
+          echo "=== [Console params][secrets] SSH_HOST: ${{ secrets.SSH_HOST }} ==="
+          echo "=== [Console params][secrets] SSH_PORT: ${{ secrets.SSH_PORT }} ==="
+          echo "=== [Console params][secrets] SSH_USERNAME: ${{ secrets.SSH_USERNAME }} ==="
+          echo "=== [Console params][secrets] SSH_KEY: ${{ secrets.SSH_KEY }} ==="
+
+          DEPLOYMENTS=$(gh api repos/${{ github.repository }}/deployments?state=all)
+          echo "deployments=$DEPLOYMENTS" >> $GITHUB_OUTPUT
+
+          echo "=== [Get deployment info][result] DEPLOYMENTS: $DEPLOYMENTS ==="
+
       - name: Upload files
         uses: appleboy/scp-action@master
         with:
