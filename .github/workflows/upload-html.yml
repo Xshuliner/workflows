@@ -81,7 +81,7 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
-          source: ${{ github.event.inputs.source }}
-          target: ${{ github.event.inputs.env == 'PROD' && format('{0}/{1}', secrets.SERVER_HTML, github.event.repository.name) || format('{0}/{1}/{2}', secrets.SERVER_HTML, github.event.inputs.env, github.event.repository.name) }}
-          rm: ${{ github.event.inputs.rm }}
-          strip_components: ${{ github.event.inputs.strip_components }}
+          source: ${{ inputs.source }}
+          target: ${{ inputs.env == 'PROD' && format('{0}/{1}', secrets.SERVER_HTML, github.event.repository.name) || format('{0}/{1}/{2}', secrets.SERVER_HTML, inputs.env, github.event.repository.name) }}
+          rm: ${{ inputs.rm }}
+          strip_components: ${{ inputs.strip_components }}
