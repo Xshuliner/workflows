@@ -12,10 +12,10 @@ on:
         default: "--"
 
       env:
-        description: "Environment type (PROD, UAT)"
+        description: "Environment type (prod, uat)"
         required: true
         type: string
-        default: "--"
+        default: "prod"
 
   workflow_dispatch:
     inputs:
@@ -26,10 +26,10 @@ on:
         default: "v0.1.2"
 
       env:
-        description: "Environment type (PROD, UAT)"
+        description: "Environment type (prod, uat)"
         required: true
         type: string
-        default: "PROD"
+        default: "prod"
 
 jobs:
   stats:
