@@ -73,6 +73,7 @@ jobs:
           echo "=== [Console params][secrets] SSH_USERNAME: ${{ secrets.SSH_USERNAME }} ==="
           echo "=== [Console params][secrets] SSH_KEY: ${{ secrets.SSH_KEY }} ==="
           echo "=== [Console params][github] repository_name: ${{ github.event.repository.name }} ==="
+          echo "======"
 
       - name: Upload files
         uses: appleboy/scp-action@master
