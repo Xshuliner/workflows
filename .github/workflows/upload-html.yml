@@ -107,3 +107,7 @@ jobs:
           target: ${{ inputs.env == 'prod' && format('{0}/{1}', secrets.SERVER_HTML, inputs.repository_name || steps.repo.outputs.repository_name) || format('{0}/{1}/{2}', secrets.SERVER_HTML, inputs.env, inputs.repository_name || steps.repo.outputs.repository_name) }}
           rm: ${{ inputs.rm }}
           strip_components: ${{ inputs.strip_components }}
+
+      - name: Console Url
+        run: |
+          echo "=== [Console Url]: ${{ inputs.env == 'prod' && format('{0}/{1}', secrets.SERVER_HTML, inputs.repository_name || steps.repo.outputs.repository_name) || format('{0}/{1}/{2}', secrets.SERVER_HTML, inputs.env, inputs.repository_name || steps.repo.outputs.repository_name) }} ==="
