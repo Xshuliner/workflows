@@ -101,6 +101,7 @@ jobs:
           echo "=== [Console Url]: ${{ steps.repo.outputs.repository_url }} ==="
 
       - name: Report success
+        if: inputs.env == 'prod'
         run: |
           # 设置重试次数和间隔
           MAX_RETRIES=3
