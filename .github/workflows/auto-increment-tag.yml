@@ -28,10 +28,6 @@ on:
           - feat
           - major
 
-# 添加权限配置
-permissions:
-  contents: write
-
 jobs:
   increment-tag:
     runs-on: ubuntu-latest
