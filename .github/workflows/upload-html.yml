@@ -35,6 +35,18 @@ on:
         type: number
         default: 1
 
+    secrets:
+      SSH_HOST:
+        required: true
+      SSH_PORT:
+        required: true
+      SSH_USERNAME:
+        required: true
+      SSH_KEY:
+        required: true
+      SERVER_HTML:
+        required: true
+
   workflow_dispatch:
     inputs:
       env:
