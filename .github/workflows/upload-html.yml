@@ -104,6 +104,6 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           source: ${{ inputs.source }}
-          target: ${{ inputs.env == 'prod' ? format('{0}/{1}', secrets.SERVER_HTML, steps.repo.outputs.repository_name) : format('{0}/{1}/{2}', secrets.SERVER_HTML, inputs.env, steps.repo.outputs.repository_name) }}
+          target: ${{ inputs.env == 'prod' && format('{0}/{1}', secrets.SERVER_HTML, steps.repo.outputs.repository_name) || format('{0}/{1}/{2}', secrets.SERVER_HTML, inputs.env, steps.repo.outputs.repository_name) }}
           rm: ${{ inputs.rm }}
           strip_components: ${{ inputs.strip_components }}
