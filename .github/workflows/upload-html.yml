@@ -118,7 +118,7 @@ jobs:
               -H 'platform: WEB' \
               --data-raw '{
                 "projectName": "'${{ steps.repo.outputs.repository_name }}'",
-                "content": "{\"version\":\"'${{ inputs.version }}'\",\"url\":\"'${{ steps.repo.outputs.repository_url }}'\",\"deployTime\":\"'$(date -u +%s)'\"}"
+                "content": '["{\"version\":\"${{ inputs.version }}\",\"url\":\"${{ steps.repo.outputs.repository_url }}\"}"]'
               }')
             
             # 分离响应内容和状态码
