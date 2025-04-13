@@ -62,9 +62,19 @@ jobs:
       - name: Get repository name
         id: repo
         run: |
-          REPO_NAME=${{ inputs.repository_name || (echo ${{ github.repository }} | cut -d'/' -f2) }}
-          REPO_PATH=${{ inputs.env == 'prod' && format('{0}/{1}', secrets.SERVER_HTML, REPO_NAME) || format('{0}/{1}/{2}', secrets.SERVER_HTML, inputs.env, REPO_NAME) }}
-          REPO_URL=${{ inputs.env == 'prod' && format('{0}/{1}', 'https://orz2.online', inputs.repository_name || REPO_NAME) || format('{0}/{1}/{2}', 'https://orz2.online', inputs.env, inputs.repository_name || REPO_NAME) }}
+          if [ -n "${{ inputs.repository_name }}" ]; then
+            REPO_NAME="${{ inputs.repository_name }}"
+          else
+            REPO_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2)
+          fi
+          
+          if [ "${{ inputs.env }}" = "prod" ]; then
+            REPO_PATH="${{ secrets.SERVER_HTML }}/$REPO_NAME"
+            REPO_URL="https://orz2.online/$REPO_NAME"
+          else
+            REPO_PATH="${{ secrets.SERVER_HTML }}/${{ inputs.env }}/$REPO_NAME"
+            REPO_URL="https://orz2.online/${{ inputs.env }}/$REPO_NAME"
+          fi
 
           echo "repository_name=$REPO_NAME" >> $GITHUB_OUTPUT
           echo "repository_path=$REPO_PATH" >> $GITHUB_OUTPUT
