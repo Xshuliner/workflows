@@ -122,4 +122,4 @@ jobs:
 
       - name: Console Url
         run: |
-          echo "=== [Console Url]: ${{ inputs.env == 'prod' && format('{0}/{1}', secrets.SERVER_HTML, inputs.repository_name || steps.repo.outputs.repository_name) || format('{0}/{1}/{2}', secrets.SERVER_HTML, inputs.env, inputs.repository_name || steps.repo.outputs.repository_name) }} ==="
+          echo "=== [Console Url]: ${{ inputs.env == 'prod' && format('{0}/{1}', 'https://orz2.online', inputs.repository_name || steps.repo.outputs.repository_name) || format('{0}/{1}/{2}', 'https://orz2.online', inputs.env, inputs.repository_name || steps.repo.outputs.repository_name) }} ==="
