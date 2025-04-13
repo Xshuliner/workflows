@@ -93,7 +93,7 @@ jobs:
           echo "=== [Console params][secrets] SSH_USERNAME: ${{ secrets.SSH_USERNAME }} ==="
           echo "=== [Console params][secrets] SSH_KEY: ${{ secrets.SSH_KEY }} ==="
           echo "=== [Console params][outputs] repository_name: ${{ steps.repo.outputs.repository_name }} ==="
-          echo "=== [Console params][github] repository_name: ${{ github.repository.name }} ==="
+          echo "=== [Console params][github] repository_name: ${{ github.repository }} ==="
           echo "======"
 
       - name: Upload files
@@ -104,6 +104,6 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           source: ${{ inputs.source }}
-          target: ${{ inputs.env == 'prod' && format('{0}/{1}', secrets.SERVER_HTML, inputs.repository_name || github.repository.name) || format('{0}/{1}/{2}', secrets.SERVER_HTML, inputs.env, inputs.repository_name || github.repository.name) }}
+          target: ${{ inputs.env == 'prod' && format('{0}/{1}', secrets.SERVER_HTML, inputs.repository_name || steps.repo.outputs.repository_name) || format('{0}/{1}/{2}', secrets.SERVER_HTML, inputs.env, inputs.repository_name || steps.repo.outputs.repository_name) }}
           rm: ${{ inputs.rm }}
           strip_components: ${{ inputs.strip_components }}
