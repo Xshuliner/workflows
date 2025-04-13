@@ -13,9 +13,9 @@ on:
 
       repository_name:
         description: "Repository name"
-        required: true
+        required: false
         type: string
-        default: "${{ github.repository.name }}"
+        default: ""
 
       source:
         description: "source for scp params"
@@ -45,9 +45,9 @@ on:
 
       repository_name:
         description: "Repository name"
-        required: true
+        required: false
         type: string
-        default: "${{ github.repository.name }}"
+        default: ""
 
       source:
         description: "source for scp params"
@@ -84,7 +84,7 @@ jobs:
       - name: Console params
         run: |
           echo "=== [Console params][params] env: ${{ inputs.env }} ==="
-          echo "=== [Console params][params] repository_name: ${{ inputs.repository_name}} ==="
+          echo "=== [Console params][params] repository_name: ${{ inputs.repository_name }} ==="
           echo "=== [Console params][params] source: ${{ inputs.source }} ==="
           echo "=== [Console params][params] rm: ${{ inputs.rm }} ==="
           echo "=== [Console params][params] strip_components: ${{ inputs.strip_components }} ==="
@@ -100,10 +100,10 @@ jobs:
         uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.SSH_HOST }}
-          port: ${{ toNumber(secrets.SSH_PORT) }}
+          port: ${{ toJSON(secrets.SSH_PORT) }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           source: ${{ inputs.source }}
-          target: ${{ inputs.env == 'prod' && format('{0}/{1}', secrets.SERVER_HTML, steps.repo.outputs.repository_name) || format('{0}/{1}/{2}', secrets.SERVER_HTML, inputs.env, steps.repo.outputs.repository_name) }}
+          target: ${{ inputs.env == 'prod' && format('{0}/{1}', secrets.SERVER_HTML, inputs.repository_name || github.repository.name) || format('{0}/{1}/{2}', secrets.SERVER_HTML, inputs.env, inputs.repository_name || github.repository.name) }}
           rm: ${{ inputs.rm }}
           strip_components: ${{ inputs.strip_components }}
