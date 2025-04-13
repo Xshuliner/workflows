@@ -11,6 +11,12 @@ on:
         type: string
         default: "prod"
 
+      repository_name:
+        description: "Repository name"
+        required: true
+        type: string
+        default: "${{ github.repository.name }}"
+
       source:
         description: "source for scp params"
         required: true
@@ -37,6 +43,12 @@ on:
         type: string
         default: "prod"
 
+      repository_name:
+        description: "Repository name"
+        required: true
+        type: string
+        default: "${{ github.repository.name }}"
+
       source:
         description: "source for scp params"
         required: true
@@ -62,9 +74,17 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Get repository name
+        id: repo
+        run: |
+          REPO_NAME=$(echo ${{ github.repository }} | cut -d'/' -f2)
+          echo "repository_name=$REPO_NAME" >> $GITHUB_OUTPUT
+          echo "Repository name: $REPO_NAME"
+
       - name: Console params
         run: |
           echo "=== [Console params][params] env: ${{ inputs.env }} ==="
+          echo "=== [Console params][params] repository_name: ${{ inputs.repository_name}} ==="
           echo "=== [Console params][params] source: ${{ inputs.source }} ==="
           echo "=== [Console params][params] rm: ${{ inputs.rm }} ==="
           echo "=== [Console params][params] strip_components: ${{ inputs.strip_components }} ==="
@@ -72,7 +92,8 @@ jobs:
           echo "=== [Console params][secrets] SSH_PORT: ${{ secrets.SSH_PORT }} ==="
           echo "=== [Console params][secrets] SSH_USERNAME: ${{ secrets.SSH_USERNAME }} ==="
           echo "=== [Console params][secrets] SSH_KEY: ${{ secrets.SSH_KEY }} ==="
-          echo "=== [Console params][github] repository_name: ${{ github.event.repository.name }} ==="
+          echo "=== [Console params][outputs] repository_name: ${{ steps.repo.outputs.repository_name }} ==="
+          echo "=== [Console params][github] repository_name: ${{ github.repository.name }} ==="
           echo "======"
 
       - name: Upload files
@@ -83,6 +104,6 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           source: ${{ inputs.source }}
-          target: ${{ inputs.env == 'prod' && format('{0}/{1}', secrets.SERVER_HTML, github.event.repository.name) || format('{0}/{1}/{2}', secrets.SERVER_HTML, inputs.env, github.event.repository.name) }}
+          target: ${{ inputs.env == 'prod' ? format('{0}/{1}', secrets.SERVER_HTML, steps.repo.outputs.repository_name) : format('{0}/{1}/{2}', secrets.SERVER_HTML, inputs.env, steps.repo.outputs.repository_name) }}
           rm: ${{ inputs.rm }}
           strip_components: ${{ inputs.strip_components }}
