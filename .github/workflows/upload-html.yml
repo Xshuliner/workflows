@@ -35,6 +35,12 @@ on:
         type: number
         default: 1
 
+      download_dist_name:
+        description: "download dist name"
+        required: true
+        type: string
+        default: "dist"
+
     secrets:
       SSH_HOST:
         required: true
@@ -55,7 +61,7 @@ jobs:
       - name: Download previous artifacts
         uses: actions/download-artifact@v4
         with:
-          name: dist
+          name: ${{ inputs.download_dist_name }}
           path: dist/
           if-no-files-found: warn
 
@@ -67,13 +73,18 @@ jobs:
           else
             REPO_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2)
           fi
-          
-          if [ "${{ inputs.env }}" = "prod" ]; then
-            REPO_PATH="${{ secrets.SERVER_HTML }}/$REPO_NAME"
-            REPO_URL="https://orz2.online/$REPO_NAME"
+
+          if [ "${{ inputs.repository_name }}" = "project-status" ] && [ "${{ inputs.env }}" = "prod" ]; then
+            REPO_PATH="${{ secrets.SERVER_HTML }}"
+            REPO_URL="https://orz2.online"
           else
-            REPO_PATH="${{ secrets.SERVER_HTML }}/${{ inputs.env }}/$REPO_NAME"
-            REPO_URL="https://orz2.online/${{ inputs.env }}/$REPO_NAME"
+            if [ "${{ inputs.env }}" = "prod" ]; then
+              REPO_PATH="${{ secrets.SERVER_HTML }}/$REPO_NAME"
+              REPO_URL="https://orz2.online/$REPO_NAME"
+            else
+              REPO_PATH="${{ secrets.SERVER_HTML }}/${{ inputs.env }}/$REPO_NAME"
+              REPO_URL="https://orz2.online/${{ inputs.env }}/$REPO_NAME"
+            fi
           fi
 
           echo "repository_name=$REPO_NAME" >> $GITHUB_OUTPUT
