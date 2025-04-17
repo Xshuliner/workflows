@@ -97,6 +97,7 @@ jobs:
           echo "=== [Console params][params] repository_name: ${{ inputs.repository_name }} ==="
           echo "=== [Console params][params] rm: ${{ inputs.rm }} ==="
           echo "=== [Console params][params] strip_components: ${{ inputs.strip_components }} ==="
+          echo "=== [Console params][params] download_dist_name: ${{ inputs.download_dist_name }} ==="
           echo "=== [Console params][secrets] SSH_HOST: ${{ secrets.SSH_HOST }} ==="
           echo "=== [Console params][secrets] SSH_PORT: ${{ secrets.SSH_PORT }} ==="
           echo "=== [Console params][secrets] SSH_USERNAME: ${{ secrets.SSH_USERNAME }} ==="
