@@ -74,7 +74,7 @@ jobs:
             REPO_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2)
           fi
 
-          if [ "${{ inputs.repository_name }}" = "project-status" ] && [ "${{ inputs.env }}" = "prod" ]; then
+          if [ "${{ github.repository }}" = "Xshuliner/project-pages" ] && [ "${{ inputs.env }}" = "prod" ]; then
             REPO_PATH="${{ secrets.SERVER_HTML }}"
             REPO_URL="https://orz2.online"
           else
