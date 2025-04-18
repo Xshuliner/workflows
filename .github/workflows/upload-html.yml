@@ -63,7 +63,6 @@ jobs:
         with:
           name: ${{ inputs.download_dist_name }}
           path: dist/
-          if-no-files-found: warn
 
       - name: Get repository name
         id: repo
