@@ -121,7 +121,8 @@ jobs:
 
       - name: Console Url
         run: |
-          echo "=== [Console Url]: ${{ steps.repo.outputs.repository_url }} ==="
+          TIMESTAMP=$(date +%s)
+          echo "=== [Console Url]: ${{ steps.repo.outputs.repository_url }}?t=$TIMESTAMP ==="
 
       - name: Report success
         if: inputs.env == 'prod'
