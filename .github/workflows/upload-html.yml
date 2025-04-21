@@ -186,22 +186,14 @@ jobs:
                 "desc": "部署通知"
               },
               "main_title": {
-                "title": "项目部署成功通知",
-                "desc": "部署环境: ${{ inputs.env }}"
+                "title": "项目名称",
+                "desc": "${{ github.repository }}"
               },
               "emphasis_content": {
-                "title": "${{ steps.repo.outputs.repository_name }}",
-                "desc": "版本: ${{ inputs.version }}"
+                "title": "版本",
+                "desc": "${{ inputs.version }}"
               },
               "horizontal_content_list": [
-                {
-                  "keyname": "项目名称",
-                  "value": "${{ steps.repo.outputs.repository_name }}"
-                },
-                {
-                  "keyname": "版本",
-                  "value": "${{ inputs.version }}"
-                },
                 {
                   "keyname": "环境",
                   "value": "${{ inputs.env }}"
