@@ -182,16 +182,16 @@ jobs:
             "template_card": {
               "card_type": "text_notice",
               "source": {
-                "icon_url": "http://oss.orz2.online/Xshuliner/common/logo.webp",
-                "desc": "部署通知"
+                "icon_url": "http://oss.orz2.online/Xshuliner/common/logo.jpg",
+                "desc": "部署成功"
               },
               "main_title": {
                 "title": "项目名称",
                 "desc": "${{ github.repository }}"
               },
               "emphasis_content": {
-                "title": "版本",
-                "desc": "${{ inputs.version }}"
+                "title": "${{ inputs.version }}",
+                "desc": "版本号"
               },
               "horizontal_content_list": [
                 {
