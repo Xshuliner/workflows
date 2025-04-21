@@ -52,6 +52,8 @@ on:
         required: true
       SERVER_HTML:
         required: true
+      QYWX_WEBHOOK:
+        required: true
 
 jobs:
   upload:
@@ -104,7 +106,7 @@ jobs:
           echo "=== [Console params][outputs] repository_name: ${{ steps.repo.outputs.repository_name }} ==="
           echo "=== [Console params][outputs] repository_path: ${{ steps.repo.outputs.repository_path }} ==="
           echo "=== [Console params][outputs] repository_url: ${{ steps.repo.outputs.repository_url }} ==="
-          
+
           echo "======"
 
       - name: Upload files
@@ -124,7 +126,7 @@ jobs:
           TIMESTAMP=$(date +%s)
           echo "=== [Console Url]: ${{ steps.repo.outputs.repository_url }}?t=$TIMESTAMP ==="
 
-      - name: Report success
+      - name: Report API for success
         if: inputs.env == 'prod'
         run: |
           # 设置重试次数和间隔
@@ -168,3 +170,67 @@ jobs:
               fi
             fi
           done
+
+      - name: Report QW for success
+        run: |
+          # 获取东八区时间
+          TIMESTAMP=$(TZ='Asia/Shanghai' date '+%Y-%m-%d %H:%M:%S')
+
+          # 构建消息内容
+          MESSAGE='{
+            "msgtype": "template_card",
+            "template_card": {
+              "card_type": "text_notice",
+              "source": {
+                "icon_url": "http://oss.orz2.online/Xshuliner/common/logo.webp",
+                "desc": "部署通知"
+              },
+              "main_title": {
+                "title": "项目部署成功通知",
+                "desc": "部署环境: ${{ inputs.env }}"
+              },
+              "emphasis_content": {
+                "title": "${{ steps.repo.outputs.repository_name }}",
+                "desc": "版本: ${{ inputs.version }}"
+              },
+              "horizontal_content_list": [
+                {
+                  "keyname": "项目名称",
+                  "value": "${{ steps.repo.outputs.repository_name }}"
+                },
+                {
+                  "keyname": "版本",
+                  "value": "${{ inputs.version }}"
+                },
+                {
+                  "keyname": "环境",
+                  "value": "${{ inputs.env }}"
+                },
+                {
+                  "keyname": "预览地址",
+                  "value": "${{ steps.repo.outputs.repository_url }}"
+                },
+                {
+                  "keyname": "部署时间",
+                  "value": "'$TIMESTAMP'"
+                }
+              ],
+              "jump_list": [
+                {
+                  "type": 1,
+                  "title": "查看预览",
+                  "url": "${{ steps.repo.outputs.repository_url }}"
+                }
+              ],
+              "card_action": {
+                "type": 1,
+                "url": "${{ steps.repo.outputs.repository_url }}"
+              }
+            }
+          }'
+
+          # 发送消息到企业微信
+          curl -H 'Content-Type: application/json' \
+               -X POST \
+               -d "$MESSAGE" \
+               ${{ secrets.QYWX_WEBHOOK }}
