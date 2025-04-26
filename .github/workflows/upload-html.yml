@@ -77,14 +77,14 @@ jobs:
 
           if [ "${{ github.repository }}" = "Xshuliner/project-pages" ] && [ "${{ inputs.env }}" = "prod" ]; then
             REPO_PATH="${{ secrets.SERVER_HTML }}"
-            REPO_URL="https://orz2.online"
+            REPO_URL="https://xshuliner.online"
           else
             if [ "${{ inputs.env }}" = "prod" ]; then
               REPO_PATH="${{ secrets.SERVER_HTML }}/$REPO_NAME"
-              REPO_URL="https://orz2.online/$REPO_NAME"
+              REPO_URL="https://xshuliner.online/$REPO_NAME"
             else
               REPO_PATH="${{ secrets.SERVER_HTML }}/${{ inputs.env }}/$REPO_NAME"
-              REPO_URL="https://orz2.online/${{ inputs.env }}/$REPO_NAME"
+              REPO_URL="https://xshuliner.online/${{ inputs.env }}/$REPO_NAME"
             fi
           fi
 
@@ -138,7 +138,7 @@ jobs:
             echo "=== 尝试发送报告 (第 $((RETRY_COUNT + 1)) 次) ==="
             
             # 发送请求并保存响应
-            RESPONSE=$(curl -s -w "\n%{http_code}" 'https://www.orz2.online/api/smart/v1/html/postCreateHtml' \
+            RESPONSE=$(curl -s -w "\n%{http_code}" 'https://www.xshuliner.online/api/smart/v1/html/postCreateHtml' \
               -H 'Content-Type: application/json' \
               -H 'authorization: Bearer html-report-key-0000001' \
               -H 'brand: page' \
@@ -182,7 +182,7 @@ jobs:
             "template_card": {
               "card_type": "text_notice",
               "source": {
-                "icon_url": "http://oss.orz2.online/Xshuliner/common/logo.jpg",
+                "icon_url": "https://cdn.jsdelivr.net/gh/gengjian1203/oss@master/Xshuliner/common/logo.jpg",
                 "desc": "部署成功"
               },
               "main_title": {
