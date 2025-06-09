@@ -77,14 +77,14 @@ jobs:
 
           if [ "${{ github.repository }}" = "Xshuliner/project-pages" ] && [ "${{ inputs.env }}" = "prod" ]; then
             REPO_PATH="${{ secrets.SERVER_HTML }}"
-            REPO_URL="https://xshuliner.online"
+            REPO_URL="https://www.xshuliner.online"
           else
             if [ "${{ inputs.env }}" = "prod" ]; then
               REPO_PATH="${{ secrets.SERVER_HTML }}/$REPO_NAME"
-              REPO_URL="https://xshuliner.online/$REPO_NAME"
+              REPO_URL="https://www.xshuliner.online/$REPO_NAME"
             else
               REPO_PATH="${{ secrets.SERVER_HTML }}/${{ inputs.env }}/$REPO_NAME"
-              REPO_URL="https://xshuliner.online/${{ inputs.env }}/$REPO_NAME"
+              REPO_URL="https://www.xshuliner.online/${{ inputs.env }}/$REPO_NAME"
             fi
           fi
 
