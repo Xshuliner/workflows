@@ -84,25 +84,25 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-     - name: Get Release Asset Download URL
-        id: get_asset_url
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const { data: assets } = await github.rest.repos.listReleaseAssets({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              release_id: ${{ steps.create_release.outputs.id }},
-            });
-            const asset = assets.find(a => a.name === '${{ inputs.download_dist_name }}');
-            if (asset) {
-              core.setOutput('asset_url', asset.browser_download_url);
-              console.log('Asset URL:', asset.browser_download_url);
-            } else {
-              core.setFailed('Asset not found');
-            }
+    #  - name: Get Release Asset Download URL
+    #     id: get_asset_url
+    #     uses: actions/github-script@v7
+    #     with:
+    #       script: |
+    #         const { data: assets } = await github.rest.repos.listReleaseAssets({
+    #           owner: context.repo.owner,
+    #           repo: context.repo.repo,
+    #           release_id: ${{ steps.create_release.outputs.id }},
+    #         });
+    #         const asset = assets.find(a => a.name === '${{ inputs.download_dist_name }}');
+    #         if (asset) {
+    #           core.setOutput('asset_url', asset.browser_download_url);
+    #           console.log('Asset URL:', asset.browser_download_url);
+    #         } else {
+    #           core.setFailed('Asset not found');
+    #         }
 
-      - name: Console Url
-        run: |
-          TIMESTAMP=$(date +%s)
-          echo "=== [Console Url]: ${{ steps.get_asset_url.outputs.asset_url }} ==="
+    #   - name: Console Url
+    #     run: |
+    #       TIMESTAMP=$(date +%s)
+    #       echo "=== [Console Url]: ${{ steps.get_asset_url.outputs.asset_url }} ==="
