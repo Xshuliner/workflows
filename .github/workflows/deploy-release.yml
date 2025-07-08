@@ -32,11 +32,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # - name: Download previous artifacts
-      #   uses: actions/download-artifact@v4
-      #   with:
-      #     name: ${{ inputs.download_dist_name }}
-      #     path: dist/
+      - name: Download previous artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.download_dist_name }}
+          path: dist/
 
       - name: Get repository name
         id: repo
@@ -74,8 +74,8 @@ jobs:
         uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ inputs.download_dist_name }}
-          asset_name: dist.zip
+          asset_path: dist/
+          asset_name: ${{ inputs.download_dist_name }}
           asset_content_type: application/zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
