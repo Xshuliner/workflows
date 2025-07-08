@@ -6,7 +6,7 @@ on:
   workflow_call:
     inputs:
       version_type:
-        description: "Version increment type (major, feat, fix)"
+        description: "Version increment type (major, feat, fix, repeat)"
         required: true
         type: string
         default: "fix"
@@ -19,7 +19,7 @@ on:
   workflow_dispatch:
     inputs:
       version_type:
-        description: "Version increment type (major, feat, fix)"
+        description: "Version increment type (major, feat, fix, repeat)"
         required: true
         type: choice
         default: "fix"
@@ -27,6 +27,7 @@ on:
           - fix
           - feat
           - major
+          - repeat
 
 jobs:
   increment-tag:
@@ -61,23 +62,28 @@ jobs:
           FEAT=$(echo $VERSION | cut -d. -f2 || echo 0)
           FIX=$(echo $VERSION | cut -d. -f3 || echo 0)
 
-          if [ "${{ inputs.version_type }}" == "major" ]; then
+          if [ "${{ inputs.version_type }}" == "repeat" ]; then
+            NEW_VERSION="${{ steps.get_tag.outputs.latest_tag }}"
+          elif [ "${{ inputs.version_type }}" == "major" ]; then
             MAJOR=$((MAJOR + 1))
             FEAT=0
             FIX=0
+            NEW_VERSION="v${MAJOR}.${FEAT}.${FIX}"
           elif [ "${{ inputs.version_type }}" == "feat" ]; then
             FEAT=$((FEAT + 1))
             FIX=0
+            NEW_VERSION="v${MAJOR}.${FEAT}.${FIX}"
           else
             FIX=$((FIX + 1))
+            NEW_VERSION="v${MAJOR}.${FEAT}.${FIX}"
           fi
 
-          NEW_VERSION="v${MAJOR}.${FEAT}.${FIX}"
           echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
 
           echo "=== [Increment version][result] NEW_VERSION: $NEW_VERSION ==="
 
       - name: Create new tag
+        if: ${{ inputs.version_type != 'repeat' }}
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
