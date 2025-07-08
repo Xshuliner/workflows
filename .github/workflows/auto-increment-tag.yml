@@ -30,9 +30,9 @@ on:
         type: choice
         default: "fix"
         options:
-          - fix
-          - feat
           - major
+          - feat
+          - fix
           - repeat
 
     updatePackageJson:
