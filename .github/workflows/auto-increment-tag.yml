@@ -104,8 +104,12 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add package.json
-          git commit -m "chore: bump version to $NEW_VERSION_NO_V [skip ci]"
-          git push
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: bump version to $NEW_VERSION_NO_V [skip ci]"
+            git push
+          else
+            echo "No changes to commit."
+          fi
 
       - name: Create new tag
         if: ${{ inputs.version_type != 'repeat' }}
