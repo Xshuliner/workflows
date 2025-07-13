@@ -132,8 +132,12 @@ jobs:
           echo "STATUS_TEXT=$STATUS_TEXT" >> $GITHUB_ENV
 
       - name: Notify QYWX
-        if: contains(inputs.third_type, 'qywx') && ${{ secrets.WEBHOOK_QYWX != '' }}
+        if: contains(inputs.third_type, 'qywx')
         run: |
+          if [ -z "${{ secrets.WEBHOOK_QYWX }}" ]; then
+            echo "WEBHOOK_QYWX 未配置，跳过通知"
+            exit 0
+          fi
           # 构建企业微信消息内容
           MESSAGE='{
             "msgtype": "template_card",
@@ -196,8 +200,12 @@ jobs:
                ${{ secrets.WEBHOOK_QYWX }}
 
       - name: Notify Feishu
-        if: contains(inputs.third_type, 'feishu') && ${{ secrets.WEBHOOK_FEISHU != '' }}
+        if: contains(inputs.third_type, 'feishu')
         run: |
+          if [ -z "${{ secrets.WEBHOOK_FEISHU }}" ]; then
+            echo "WEBHOOK_FEISHU 未配置，跳过通知"
+            exit 0
+          fi
           # 构建飞书消息内容
           MESSAGE='{
             "msg_type": "interactive",
@@ -245,8 +253,12 @@ jobs:
                ${{ secrets.WEBHOOK_FEISHU }}
 
       - name: Notify DingTalk
-        if: contains(inputs.third_type, 'dingtalk') && ${{ secrets.WEBHOOK_DINGTALK != '' }}
+        if: contains(inputs.third_type, 'dingtalk')
         run: |
+          if [ -z "${{ secrets.WEBHOOK_DINGTALK }}" ]; then
+            echo "WEBHOOK_DINGTALK 未配置，跳过通知"
+            exit 0
+          fi
           # 构建钉钉消息内容
           MESSAGE='{
             "msgtype": "markdown",
@@ -266,8 +278,12 @@ jobs:
                ${{ secrets.WEBHOOK_DINGTALK }}
 
       - name: Notify Teams
-        if: contains(inputs.third_type, 'teams') && ${{ secrets.WEBHOOK_TEAMS != '' }}
+        if: contains(inputs.third_type, 'teams')
         run: |
+          if [ -z "${{ secrets.WEBHOOK_TEAMS }}" ]; then
+            echo "WEBHOOK_TEAMS 未配置，跳过通知"
+            exit 0
+          fi
           # 构建Teams消息内容
           MESSAGE='{
             "@type": "MessageCard",
