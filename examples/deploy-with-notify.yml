@@ -97,7 +97,7 @@ jobs:
   notify-success:
     needs: [build, deploy]
     if: success() && (github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch')
-    uses: ./.github/workflows/notify-third.yml
+    uses: ./.github/workflows/notify-third-party.yml
     with:
       env: ${{ github.event.inputs.env || 'prod' }}
       version: ${{ needs.build.outputs.version }}
@@ -114,7 +114,7 @@ jobs:
   notify-failure:
     needs: [build, deploy]
     if: failure() && (github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch')
-    uses: ./.github/workflows/notify-third.yml
+    uses: ./.github/workflows/notify-third-party.yml
     with:
       env: ${{ github.event.inputs.env || 'prod' }}
       version: ${{ needs.build.outputs.version }}
@@ -131,7 +131,7 @@ jobs:
   notify-uat:
     needs: build
     if: github.ref == 'refs/heads/develop'
-    uses: ./.github/workflows/notify-third.yml
+    uses: ./.github/workflows/notify-third-party.yml
     with:
       env: "uat"
       version: ${{ needs.build.outputs.version }}
@@ -145,7 +145,7 @@ jobs:
   notify-pr:
     needs: build
     if: github.event_name == 'pull_request'
-    uses: ./.github/workflows/notify-third.yml
+    uses: ./.github/workflows/notify-third-party.yml
     with:
       env: "pr"
       version: ${{ needs.build.outputs.version }}

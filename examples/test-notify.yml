@@ -29,7 +29,7 @@ on:
 jobs:
   test-notify:
     runs-on: ubuntu-latest
-    uses: ./.github/workflows/notify-third.yml
+    uses: ./.github/workflows/notify-third-party.yml
     with:
       env: "test"
       version: "v1.0.0-test"
