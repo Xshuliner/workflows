@@ -90,7 +90,7 @@ jobs:
             REPO_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2)
           fi
 
-          REPO_PATH="${{ secrets.SERVER_API }}/api2025/${{ inputs.env }}/$REPO_NAME"
+          REPO_PATH="${{ secrets.SERVER_API }}/${{ inputs.env }}/$REPO_NAME"
 
           if [ "${{ inputs.env }}" = "prod" ]; then
             PREVIEW_URL="https://www.xshuliner.online/api/smart/swagger"
@@ -140,7 +140,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           script: |
             cd ${{ steps.repo.outputs.repository_path }}${{ inputs.code_path }}
-            
+
             yarn install
 
             # 确保 pm2 已安装
