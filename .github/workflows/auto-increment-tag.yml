@@ -12,10 +12,10 @@ on:
         default: "fix"
 
       update_package_json_path:
-        description: "Is update package json"
+        description: "Update package json path"
         required: false
-        type: boolean
-        default: false
+        type: string
+        default: ""
 
     outputs:
       new_version:
@@ -38,8 +38,8 @@ on:
       update_package_json_path:
           description: "Update package json path"
           required: false
-          type: boolean
-          default: false
+          type: string
+          default: ""
 
 jobs:
   increment-tag:
