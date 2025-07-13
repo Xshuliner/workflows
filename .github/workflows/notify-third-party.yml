@@ -188,7 +188,7 @@ jobs:
               ],
               "card_action": {
                 "type": 1,
-                "url": "${{ github.server_url }}/${{ github.repository }}"
+                "url": "${{ inputs.preview_url }}"
               }
             }
           }'
