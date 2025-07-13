@@ -170,7 +170,7 @@ jobs:
               echo "启动 smartUat 进程 done"
             fi
 
-            pm2 save
+            pm2 save --force
             pm2 startup
 
       - name: Console Url
