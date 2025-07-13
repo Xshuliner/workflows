@@ -23,6 +23,12 @@ on:
         type: string
         default: ""
 
+      code_path:
+        description: "Code path"
+        required: false
+        type: string
+        default: ""
+
       rm:
         description: "rm for scp params"
         required: false
@@ -133,7 +139,8 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            cd ${{ steps.repo.outputs.repository_path }}
+            cd ${{ steps.repo.outputs.repository_path }}${{ inputs.code_path }}
+            
             yarn install
 
             # 确保 pm2 已安装
