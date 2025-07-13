@@ -1,131 +1,313 @@
-# workflows
+# workflows 公共工作流仓库
 
-## 公共工作流仓库
+本仓库收集并维护了多种常用的 GitHub Actions 工作流，适用于自动化版本号管理、构建发布、静态资源上传、以及多平台通知等场景。所有工作流均可被其他项目直接复用，极大提升自动化运维效率。
 
-这是一个包含常用 GitHub Actions 工作流的公共仓库。
+---
 
-## 工作流列表
+## 目录
 
-### 1. Auto Increment Tag (自动版本号递增)
+- [功能概览](#功能概览)
+- [快速开始](#快速开始)
+- [工作流说明](#工作流说明)
+  - [1. 自动递增版本号（auto-increment-tag.yml）](#1-自动递增版本号auto-increment-tagyml)
+  - [2. 发布 Release（deploy-release.yml）](#2-发布-releasedeploy-releaseyml)
+  - [3. 上传 HTML 静态资源（upload-html.yml）](#3-上传-html-静态资源upload-htmlyml)
+  - [4. 多平台通知（notify-third-party.yml）](#4-多平台通知notify-third-partyyml)
+- [示例](#示例)
+- [Webhook 配置](#webhook-配置)
+- [常见问题](#常见问题)
+- [贡献与许可](#贡献与许可)
 
-**功能描述**: 自动递增 Git 标签版本号，支持语义化版本控制
+---
 
-**详细步骤**:
-1. **获取最新标签**: 从 Git 仓库中获取最新的版本标签，如果没有则使用 `v0.0.0`
-2. **版本号解析**: 将版本号拆分为主版本号(major)、功能版本号(feat)、修复版本号(fix)
-3. **版本递增**: 根据指定的递增类型进行版本号更新：
-   - `major`: 主版本号+1，功能版本号和修复版本号重置为0
-   - `feat`: 功能版本号+1，修复版本号重置为0
-   - `fix`: 修复版本号+1
-   - `repeat`: 保持当前版本号不变
-4. **更新 package.json**: 可选择更新指定路径的 package.json 文件中的版本号
-5. **创建新标签**: 创建新的 Git 标签并推送到远程仓库
+## 功能概览
 
-**输入参数**:
-- `version_type`: 版本递增类型 (major/feat/fix/repeat)，默认: "fix"
-- `update_package_json_path`: package.json 文件路径，可选
+- **自动递增版本号**：支持主版本、功能、修复递增，自动打 tag，可选同步 package.json。
+- **自动发布 Release**：自动打包构建产物并发布到 GitHub Release。
+- **静态资源上传**：支持通过 SCP 上传 HTML 资源到服务器，并自动生成预览链接。
+- **多平台通知**：支持企业微信、飞书、钉钉、Teams 等多平台消息通知，支持多平台并发推送。
 
-**输出参数**:
-- `new_version`: 递增后的新版本号
+---
 
-### 2. Deploy Release (部署到 Release)
+## 快速开始
 
-**功能描述**: 将构建产物打包并发布到 GitHub Release
+1. **Fork 或直接引用本仓库的 workflow 文件**
+2. **在你的项目仓库配置所需的 Secrets（如 webhook、服务器信息等）**
+3. **在你的 workflow 中通过 `uses` 语法调用本仓库的工作流**
 
-**详细步骤**:
-1. **获取仓库信息**: 确定仓库名称和生成带时间戳的压缩包名称
-2. **下载构建产物**: 从之前的构建步骤中下载指定的构建产物
-3. **打包压缩**: 将构建产物打包成 ZIP 文件
-4. **创建 Release**: 在 GitHub 上创建新的 Release，包含详细的发布信息
-5. **上传资源**: 将打包好的 ZIP 文件作为 Release 附件上传
+---
 
-**输入参数**:
-- `version`: 版本号，必需
-- `repository_name`: 仓库名称，可选，默认使用当前仓库名
-- `download_dist_name`: 构建产物名称，默认: "dist"
+## 工作流说明
 
-**Release 信息包含**:
-- 仓库名称和版本号
-- 分支和提交信息
-- 构建时间
-- 下载链接
+### 1. 自动递增版本号（auto-increment-tag.yml）
 
-### 3. Upload Html (上传 HTML)
+**功能**：自动递增 Git tag 版本号，支持 `major`、`feat`、`fix`、`repeat` 四种模式，并可选同步 package.json。
 
-**功能描述**: 将构建的 HTML 文件上传到服务器并发送通知
+**主要参数**：
+- `version_type`：递增类型（major/feat/fix/repeat）
+- `update_package_json_path`：可选，指定 package.json 路径
 
-**详细步骤**:
-1. **下载构建产物**: 从之前的构建步骤中下载 HTML 文件
-2. **确定部署路径**: 根据环境类型和仓库名称确定服务器上的部署路径
-3. **上传文件**: 使用 SCP 将文件上传到指定服务器
-4. **生成预览链接**: 根据部署路径生成预览 URL
-5. **发送成功报告**: 向 API 发送部署成功报告（仅生产环境）
-6. **发送企业微信通知**: 发送包含预览链接的通知消息
+**输出**：
+- `new_version`：递增后的新版本号
 
-**输入参数**:
-- `env`: 环境类型 (prod/uat)，必需
-- `version`: 版本号，必需
-- `repository_name`: 仓库名称，可选
-- `rm`: SCP 参数，是否删除目标目录，默认: true
-- `strip_components`: SCP 参数，去除的目录层级，默认: 1
-- `download_dist_name`: 构建产物名称，默认: "dist"
+---
 
-**必需密钥**:
-- `SSH_HOST`: SSH 服务器地址
-- `SSH_PORT`: SSH 端口
-- `SSH_USERNAME`: SSH 用户名
-- `SSH_KEY`: SSH 私钥
-- `SERVER_HTML`: 服务器 HTML 根目录
-- `QYWX_WEBHOOK`: 企业微信机器人 Webhook
+### 2. 发布 Release（deploy-release.yml）
 
-**预览 URL 规则**:
-- 生产环境: `https://www.xshuliner.online/{repository_name}`
-- UAT 环境: `https://www.xshuliner.online/uat/{repository_name}`
-- 特殊项目 `project-pages` 生产环境: `https://www.xshuliner.online`
+**功能**：将构建产物打包并自动发布到 GitHub Release，支持自定义产物名。
 
-## 使用示例
+**主要参数**：
+- `version`：版本号（通常为 tag）
+- `repository_name`：可选，仓库名
+- `download_dist_name`：产物目录名
 
-### 在其他仓库中调用工作流
+---
+
+### 3. 上传 HTML 静态资源（upload-html.yml）
+
+**功能**：将构建好的 HTML 资源通过 SCP 上传到服务器，自动生成预览链接，并在生产环境下上报部署 API。
+
+**主要参数**：
+- `env`：环境类型（prod/uat）
+- `version`：版本号
+- `repository_name`：可选，仓库名
+- `rm`：上传前是否清空目标目录
+- `strip_components`：上传时去除的目录层级
+- `download_dist_name`：产物目录名
+
+**Secrets**：
+- `SSH_HOST`、`SSH_PORT`、`SSH_USERNAME`、`SSH_KEY`、`SERVER_HTML`（服务器信息）
+
+**输出**：
+- `preview_url`：预览链接
+- `repository_path`：服务器路径
+
+---
+
+### 4. 多平台通知（notify-third-party.yml）
+
+**功能**：支持企业微信、飞书、钉钉、Teams 多平台消息通知，支持多平台并发推送，支持自定义通知内容和状态。
+
+**主要参数**：
+- `env`：环境类型（prod/uat）
+- `version`：版本号
+- `preview_url`：可选，预览地址
+- `project_name`：可选，项目名称
+- `third_type`：通知平台（qywx, feishu, dingtalk, teams，可逗号分隔多平台）
+- `status`：通知状态（success, failure, warning）
+
+**Secrets**：
+- `WEBHOOK_QYWX`、`WEBHOOK_FEISHU`、`WEBHOOK_DINGTALK`、`WEBHOOK_TEAMS`
+
+---
+
+## 示例
+
+详见 [`examples/deploy-with-notify.yml`](examples/deploy-with-notify.yml) 和 [`examples/test-notify.yml`](examples/test-notify.yml)。
+
+**多平台通知示例**：
 
 ```yaml
-# 在 .github/workflows/your-workflow.yml 中
-jobs:
-  build:
-    # ... 构建步骤 ...
-    
-  deploy:
-    needs: build
-    uses: Xshuliner/workflows/.github/workflows/auto-increment-tag.yml@main
-    with:
-      version_type: "feat"
-      update_package_json_path: "package.json"
-    
-  release:
-    needs: [build, deploy]
-    uses: Xshuliner//workflows/.github/workflows/deploy-release.yml@main
-    with:
-      version: ${{ needs.deploy.outputs.new_version }}
-      download_dist_name: "dist"
-    
-  upload:
-    needs: [build, deploy]
-    uses: Xshuliner/workflows/.github/workflows/upload-html.yml@main
-    with:
-      env: "prod"
-      version: ${{ needs.deploy.outputs.new_version }}
-      download_dist_name: "dist"
-    secrets:
-      SSH_HOST: ${{ secrets.SSH_HOST }}
-      SSH_PORT: ${{ secrets.SSH_PORT }}
-      SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
-      SSH_KEY: ${{ secrets.SSH_KEY }}
-      SERVER_HTML: ${{ secrets.SERVER_HTML }}
-      QYWX_WEBHOOK: ${{ secrets.QYWX_WEBHOOK }}
+- name: Notify deployment
+  uses: ./.github/workflows/notify-third-party.yml
+  with:
+    env: "prod"
+    version: "v1.0.0"
+    preview_url: "https://example.com"
+    project_name: "我的项目"
+    third_type: "qywx,feishu,dingtalk,teams"
+    status: "success"
+  secrets:
+    WEBHOOK_QYWX: ${{ secrets.WEBHOOK_QYWX }}
+    WEBHOOK_FEISHU: ${{ secrets.WEBHOOK_FEISHU }}
+    WEBHOOK_DINGTALK: ${{ secrets.WEBHOOK_DINGTALK }}
+    WEBHOOK_TEAMS: ${{ secrets.WEBHOOK_TEAMS }}
 ```
 
-## 注意事项
+---
 
-1. **权限要求**: 确保工作流有足够的权限访问仓库和创建 Release
-2. **密钥配置**: 使用 HTML 上传功能前需要配置相应的 SSH 密钥和企业微信 Webhook
-3. **版本管理**: 建议使用语义化版本号，遵循 major.feat.fix 格式
-4. **环境区分**: 生产环境和 UAT 环境使用不同的部署路径和通知策略
+# Webhook 配置指南
+
+本文档介绍如何为各种第三方平台配置webhook，以便接收GitHub Actions的部署通知。
+
+## 企业微信 (QYWX)
+
+### 1. 创建机器人
+1. 在企业微信群中，点击右上角的设置图标
+2. 选择"群机器人" → "添加机器人"
+3. 选择"自定义"机器人
+4. 设置机器人名称和头像
+
+### 2. 获取Webhook地址
+1. 创建完成后，复制webhook地址
+2. 格式：`https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=xxxxxxxx`
+
+### 3. 配置GitHub Secrets
+在GitHub仓库的Settings > Secrets and variables > Actions中添加：
+```
+WEBHOOK_QYWX=https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=xxxxxxxx
+```
+
+## 飞书 (Feishu)
+
+### 1. 创建机器人
+1. 在飞书群中，点击右上角的设置图标
+2. 选择"群设置" → "群机器人" → "添加机器人"
+3. 选择"自定义机器人"
+4. 设置机器人名称和头像
+
+### 2. 获取Webhook地址
+1. 创建完成后，复制webhook地址
+2. 格式：`https://open.feishu.cn/open-apis/bot/v2/hook/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`
+
+### 3. 配置GitHub Secrets
+在GitHub仓库的Settings > Secrets and variables > Actions中添加：
+```
+WEBHOOK_FEISHU=https://open.feishu.cn/open-apis/bot/v2/hook/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+```
+
+## 钉钉 (DingTalk)
+
+### 1. 创建机器人
+1. 在钉钉群中，点击右上角的设置图标
+2. 选择"群设置" → "智能群助手" → "添加机器人"
+3. 选择"自定义"机器人
+4. 设置机器人名称和头像
+
+### 2. 获取Webhook地址
+1. 创建完成后，复制webhook地址
+2. 格式：`https://oapi.dingtalk.com/robot/send?access_token=xxxxxxxx`
+
+### 3. 配置GitHub Secrets
+在GitHub仓库的Settings > Secrets and variables > Actions中添加：
+```
+WEBHOOK_DINGTALK=https://oapi.dingtalk.com/robot/send?access_token=xxxxxxxx
+```
+
+## Microsoft Teams
+
+### 1. 创建Incoming Webhook
+1. 在Teams频道中，点击"..." → "管理连接器"
+2. 找到"Incoming Webhook"并点击"配置"
+3. 设置webhook名称和头像
+4. 点击"创建"
+
+### 2. 获取Webhook地址
+1. 创建完成后，复制webhook地址
+2. 格式：`https://xxxxx.webhook.office.com/webhookb2/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx@xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/IncomingWebhook/xxxxxxxx/xxxxxxxx`
+
+### 3. 配置GitHub Secrets
+在GitHub仓库的Settings > Secrets and variables > Actions中添加：
+```
+WEBHOOK_TEAMS=https://xxxxx.webhook.office.com/webhookb2/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx@xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/IncomingWebhook/xxxxxxxx/xxxxxxxx
+```
+
+## 安全配置
+
+### 企业微信
+- 支持IP白名单
+- 支持关键词过滤
+- 支持签名验证
+
+### 飞书
+- 支持IP白名单
+- 支持签名验证
+- 支持关键词过滤
+
+### 钉钉
+- 支持IP白名单
+- 支持签名验证
+- 支持关键词过滤
+
+### Teams
+- 支持IP白名单
+- 支持身份验证
+
+## 测试Webhook
+
+### 使用curl测试
+```bash
+# 企业微信
+curl -H 'Content-Type: application/json' \
+     -X POST \
+     -d '{"msgtype": "text", "text": {"content": "测试消息"}}' \
+     https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=xxxxxxxx
+
+# 飞书
+curl -H 'Content-Type: application/json' \
+     -X POST \
+     -d '{"msg_type": "text", "content": {"text": "测试消息"}}' \
+     https://open.feishu.cn/open-apis/bot/v2/hook/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+
+# 钉钉
+curl -H 'Content-Type: application/json' \
+     -X POST \
+     -d '{"msgtype": "text", "text": {"content": "测试消息"}}' \
+     https://oapi.dingtalk.com/robot/send?access_token=xxxxxxxx
+
+# Teams
+curl -H 'Content-Type: application/json' \
+     -X POST \
+     -d '{"text": "测试消息"}' \
+     https://xxxxx.webhook.office.com/webhookb2/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx@xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/IncomingWebhook/xxxxxxxx/xxxxxxxx
+```
+
+### 使用GitHub Actions测试
+1. 在仓库中运行测试workflow：`examples/test-notify.yml`
+2. 选择要测试的平台和状态
+3. 检查是否收到通知消息
+
+## 常见问题
+
+- **消息未收到？** 检查 webhook 地址、机器人是否在群、Secrets 是否配置正确。
+- **格式异常？** 检查参数内容、特殊字符、平台消息格式要求。
+- **权限问题？** 检查机器人权限、群组设置、webhook 有效性。
+
+### 1. 消息发送失败
+- 检查webhook地址是否正确
+- 确认机器人是否被添加到群组
+- 检查IP白名单设置
+- 查看GitHub Actions执行日志
+
+### 2. 消息格式错误
+- 确认webhook支持的消息格式
+- 检查JSON格式是否正确
+- 验证特殊字符是否被正确转义
+
+### 3. 权限问题
+- 确认机器人有发送消息权限
+- 检查群组权限设置
+- 验证webhook是否仍然有效
+
+## 最佳实践
+
+1. **安全性**
+   - 定期轮换webhook地址
+   - 使用IP白名单限制访问
+   - 启用签名验证
+
+2. **可靠性**
+   - 配置多个通知平台作为备份
+   - 监控webhook的可用性
+   - 设置失败重试机制
+
+3. **可维护性**
+   - 使用有意义的机器人名称
+   - 记录webhook配置信息
+   - 定期测试通知功能
+
+## 相关链接
+
+- [企业微信机器人文档](https://developer.work.weixin.qq.com/document/path/91770)
+- [飞书机器人文档](https://open.feishu.cn/document/ukTMukTMukTM/ucTM5YjL3ETO24yNxkjN)
+- [钉钉机器人文档](https://open.dingtalk.com/document/robots/custom-robot-access)
+- [Teams Incoming Webhook文档](https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook) 
+
+---
+
+## 贡献与许可
+
+- 欢迎提交 Issue 和 PR 共同完善本仓库。
+- 代码遵循 MIT License。
+
+如需更多帮助，请查阅各 workflow 文件头部注释、示例文件和文档目录。

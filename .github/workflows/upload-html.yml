@@ -41,6 +41,14 @@ on:
         type: string
         default: "dist"
 
+    outputs:
+      preview_url:
+        description: "Preview URL for the uploaded HTML"
+        value: ${{ jobs.upload.outputs.preview_url }}
+      repository_path:
+        description: "Repository path on server"
+        value: ${{ jobs.upload.outputs.repository_path }}
+
     secrets:
       SSH_HOST:
         required: true
@@ -52,12 +60,13 @@ on:
         required: true
       SERVER_HTML:
         required: true
-      QYWX_WEBHOOK:
-        required: true
 
 jobs:
   upload:
     runs-on: ubuntu-latest
+    outputs:
+      preview_url: ${{ steps.repo.outputs.preview_url }}
+      repository_path: ${{ steps.repo.outputs.repository_path }}
 
     steps:
       - name: Download previous artifacts
@@ -176,59 +185,3 @@ jobs:
               fi
             fi
           done
-
-      - name: Report QW for success
-        run: |
-          # 获取东八区时间
-          TIMESTAMP=$(TZ='Asia/Shanghai' date '+%Y-%m-%d %H:%M:%S')
-
-          # 构建消息内容
-          MESSAGE='{
-            "msgtype": "template_card",
-            "template_card": {
-              "card_type": "text_notice",
-              "source": {
-                "icon_url": "https://cdn.jsdelivr.net/gh/gengjian1203/oss@master/Xshuliner/common/logo.jpg",
-                "desc": "部署成功"
-              },
-              "main_title": {
-                "title": "项目名称",
-                "desc": "${{ github.repository }}"
-              },
-              "emphasis_content": {
-                "title": "${{ inputs.version }}",
-                "desc": "版本号"
-              },
-              "horizontal_content_list": [
-                {
-                  "keyname": "环境",
-                  "value": "${{ inputs.env }}"
-                },
-                {
-                  "keyname": "预览地址",
-                  "value": "${{ steps.repo.outputs.preview_url }}"
-                },
-                {
-                  "keyname": "部署时间",
-                  "value": "'$TIMESTAMP'"
-                }
-              ],
-              "jump_list": [
-                {
-                  "type": 1,
-                  "title": "查看预览",
-                  "url": "${{ steps.repo.outputs.preview_url }}"
-                }
-              ],
-              "card_action": {
-                "type": 1,
-                "url": "${{ steps.repo.outputs.preview_url }}"
-              }
-            }
-          }'
-
-          # 发送消息到企业微信
-          curl -H 'Content-Type: application/json' \
-               -X POST \
-               -d "$MESSAGE" \
-               ${{ secrets.QYWX_WEBHOOK }}

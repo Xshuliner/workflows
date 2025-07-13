@@ -1,0 +1,350 @@
+name: Notify Third Party
+
+run-name: Notify Third Party
+
+on:
+  workflow_call:
+    inputs:
+      env:
+        description: "Environment type (prod, uat)"
+        required: true
+        type: string
+        default: "prod"
+
+      version:
+        description: "Version"
+        required: true
+        type: string
+        default: "--"
+
+      preview_url:
+        description: "Preview URL"
+        required: false
+        type: string
+        default: ""
+
+      project_name:
+        description: "Project name"
+        required: false
+        type: string
+        default: ""
+
+      third_type:
+        description: "Third party notification types (qywx, feishu, dingtalk, teams)"
+        required: true
+        type: string
+        default: "qywx"
+
+      status:
+        description: "Deployment status (success, failure, warning)"
+        required: false
+        type: string
+        default: "success"
+
+    secrets:
+      WEBHOOK_QYWX:
+        required: false
+      WEBHOOK_FEISHU:
+        required: false
+      WEBHOOK_DINGTALK:
+        required: false
+      WEBHOOK_TEAMS:
+        required: false
+
+  workflow_dispatch:
+    inputs:
+      env:
+        description: "Environment type (prod, uat)"
+        required: true
+        type: string
+        default: "prod"
+
+      version:
+        description: "Version"
+        required: true
+        type: string
+        default: "--"
+
+      preview_url:
+        description: "Preview URL"
+        required: false
+        type: string
+        default: ""
+
+      project_name:
+        description: "Project name"
+        required: false
+        type: string
+        default: ""
+
+      third_type:
+        description: "Third party notification types (qywx, feishu, dingtalk, teams)"
+        required: true
+        type: string
+        default: "qywx"
+
+      status:
+        description: "Deployment status (success, failure, warning)"
+        required: false
+        type: string
+        default: "success"
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Setup notification environment
+        run: |
+          # 获取东八区时间
+          TIMESTAMP=$(TZ='Asia/Shanghai' date '+%Y-%m-%d %H:%M:%S')
+          
+          # 设置项目名称
+          PROJECT_NAME="${{ inputs.project_name }}"
+          if [ -z "$PROJECT_NAME" ]; then
+            PROJECT_NAME="${{ github.repository }}"
+          fi
+          
+          # 设置状态相关变量
+          STATUS="${{ inputs.status }}"
+          case $STATUS in
+            "success")
+              STATUS_EMOJI="✅"
+              STATUS_TEXT="部署成功"
+              ;;
+            "failure")
+              STATUS_EMOJI="❌"
+              STATUS_TEXT="部署失败"
+              ;;
+            "warning")
+              STATUS_EMOJI="⚠️"
+              STATUS_TEXT="部署警告"
+              ;;
+            *)
+              STATUS_EMOJI="ℹ️"
+              STATUS_TEXT="部署通知"
+              ;;
+          esac
+          
+          echo "TIMESTAMP=$TIMESTAMP" >> $GITHUB_ENV
+          echo "PROJECT_NAME=$PROJECT_NAME" >> $GITHUB_ENV
+          echo "STATUS_EMOJI=$STATUS_EMOJI" >> $GITHUB_ENV
+          echo "STATUS_TEXT=$STATUS_TEXT" >> $GITHUB_ENV
+
+      - name: Notify QYWX
+        if: contains(inputs.third_type, 'qywx') && ${{ secrets.WEBHOOK_QYWX != '' }}
+        run: |
+          # 构建企业微信消息内容
+          MESSAGE='{
+            "msgtype": "template_card",
+            "template_card": {
+              "card_type": "text_notice",
+              "source": {
+                "icon_url": "https://cdn.jsdelivr.net/gh/gengjian1203/oss@master/Xshuliner/common/logo.jpg",
+                "desc": "'$STATUS_TEXT'"
+              },
+              "main_title": {
+                "title": "'$PROJECT_NAME'",
+                "desc": "${{ github.repository }}"
+              },
+              "emphasis_content": {
+                "title": "${{ inputs.version }}",
+                "desc": "版本号"
+              },
+              "horizontal_content_list": [
+                {
+                  "keyname": "环境",
+                  "value": "${{ inputs.env }}"
+                },
+                {
+                  "keyname": "状态",
+                  "value": "'$STATUS_TEXT'"
+                },
+                {
+                  "keyname": "部署时间",
+                  "value": "'$TIMESTAMP'"
+                }
+                '$([ -n "${{ inputs.preview_url }}" ] && echo ',
+                {
+                  "keyname": "预览地址",
+                  "value": "${{ inputs.preview_url }}"
+                }' || echo '')'
+              ],
+              "jump_list": [
+                {
+                  "type": 1,
+                  "title": "查看仓库",
+                  "url": "${{ github.server_url }}/${{ github.repository }}"
+                }'$([ -n "${{ inputs.preview_url }}" ] && echo ',
+                {
+                  "type": 1,
+                  "title": "查看预览",
+                  "url": "${{ inputs.preview_url }}"
+                }' || echo '')'
+              ],
+              "card_action": {
+                "type": 1,
+                "url": "${{ github.server_url }}/${{ github.repository }}"
+              }
+            }
+          }'
+
+          # 发送消息到企业微信
+          curl -H 'Content-Type: application/json' \
+               -X POST \
+               -d "$MESSAGE" \
+               ${{ secrets.WEBHOOK_QYWX }}
+
+      - name: Notify Feishu
+        if: contains(inputs.third_type, 'feishu') && ${{ secrets.WEBHOOK_FEISHU != '' }}
+        run: |
+          # 构建飞书消息内容
+          MESSAGE='{
+            "msg_type": "interactive",
+            "card": {
+              "config": {
+                "wide_screen_mode": true
+              },
+              "header": {
+                "title": {
+                  "tag": "plain_text",
+                  "content": "'$STATUS_EMOJI' '$PROJECT_NAME' 部署通知"
+                },
+                "template": "'$([ "$STATUS" = "success" ] && echo "green" || [ "$STATUS" = "failure" ] && echo "red" || echo "orange")'"
+              },
+              "elements": [
+                {
+                  "tag": "div",
+                  "text": {
+                    "tag": "lark_md",
+                    "content": "**项目名称：**'$PROJECT_NAME'\\n**版本号：**${{ inputs.version }}\\n**环境：**${{ inputs.env }}\\n**状态：**'$STATUS_TEXT'\\n**部署时间：**'$TIMESTAMP'"
+                  }
+                }'$([ -n "${{ inputs.preview_url }}" ] && echo ',
+                {
+                  "tag": "action",
+                  "actions": [
+                    {
+                      "tag": "button",
+                      "text": {
+                        "tag": "plain_text",
+                        "content": "查看预览"
+                      },
+                      "type": "primary",
+                      "url": "${{ inputs.preview_url }}"
+                    }
+                  ]
+                }' || echo '')'
+              ]
+            }
+          }'
+
+          # 发送消息到飞书
+          curl -H 'Content-Type: application/json' \
+               -X POST \
+               -d "$MESSAGE" \
+               ${{ secrets.WEBHOOK_FEISHU }}
+
+      - name: Notify DingTalk
+        if: contains(inputs.third_type, 'dingtalk') && ${{ secrets.WEBHOOK_DINGTALK != '' }}
+        run: |
+          # 构建钉钉消息内容
+          MESSAGE='{
+            "msgtype": "markdown",
+            "markdown": {
+              "title": "'$STATUS_EMOJI' '$PROJECT_NAME' 部署通知",
+              "text": "## '$STATUS_EMOJI' '$PROJECT_NAME' 部署通知\\n\\n**项目名称：**'$PROJECT_NAME'\\n**版本号：**${{ inputs.version }}\\n**环境：**${{ inputs.env }}\\n**状态：**'$STATUS_TEXT'\\n**部署时间：**'$TIMESTAMP'\\n**仓库地址：**[${{ github.repository }}](${{ github.server_url }}/${{ github.repository }})'$([ -n "${{ inputs.preview_url }}" ] && echo '\\n**预览地址：**[${{ inputs.preview_url }}](${{ inputs.preview_url }})' || echo '')'"
+            },
+            "at": {
+              "isAtAll": false
+            }
+          }'
+
+          # 发送消息到钉钉
+          curl -H 'Content-Type: application/json' \
+               -X POST \
+               -d "$MESSAGE" \
+               ${{ secrets.WEBHOOK_DINGTALK }}
+
+      - name: Notify Teams
+        if: contains(inputs.third_type, 'teams') && ${{ secrets.WEBHOOK_TEAMS != '' }}
+        run: |
+          # 构建Teams消息内容
+          MESSAGE='{
+            "@type": "MessageCard",
+            "@context": "http://schema.org/extensions",
+            "themeColor": "'$([ "$STATUS" = "success" ] && echo "00FF00" || [ "$STATUS" = "failure" ] && echo "FF0000" || echo "FFA500")'",
+            "summary": "'$STATUS_EMOJI' '$PROJECT_NAME' 部署通知",
+            "sections": [
+              {
+                "activityTitle": "'$STATUS_EMOJI' '$PROJECT_NAME' 部署通知",
+                "activitySubtitle": "'$TIMESTAMP'",
+                "facts": [
+                  {
+                    "name": "项目名称",
+                    "value": "'$PROJECT_NAME'"
+                  },
+                  {
+                    "name": "版本号",
+                    "value": "${{ inputs.version }}"
+                  },
+                  {
+                    "name": "环境",
+                    "value": "${{ inputs.env }}"
+                  },
+                  {
+                    "name": "状态",
+                    "value": "'$STATUS_TEXT'"
+                  },
+                  {
+                    "name": "部署时间",
+                    "value": "'$TIMESTAMP'"
+                  }'$([ -n "${{ inputs.preview_url }}" ] && echo ',
+                  {
+                    "name": "预览地址",
+                    "value": "[${{ inputs.preview_url }}](${{ inputs.preview_url }})"
+                  }' || echo '')'
+                ],
+                "markdown": true
+              }
+            ],
+            "potentialAction": [
+              {
+                "@type": "OpenUri",
+                "name": "查看仓库",
+                "targets": [
+                  {
+                    "os": "default",
+                    "uri": "${{ github.server_url }}/${{ github.repository }}"
+                  }
+                ]
+              }'$([ -n "${{ inputs.preview_url }}" ] && echo ',
+              {
+                "@type": "OpenUri",
+                "name": "查看预览",
+                "targets": [
+                  {
+                    "os": "default",
+                    "uri": "${{ inputs.preview_url }}"
+                  }
+                ]
+              }' || echo '')'
+            ]
+          }'
+
+          # 发送消息到Teams
+          curl -H 'Content-Type: application/json' \
+               -X POST \
+               -d "$MESSAGE" \
+               ${{ secrets.WEBHOOK_TEAMS }}
+
+      - name: Check notification status
+        run: |
+          echo "通知类型: ${{ inputs.third_type }}"
+          echo "项目名称: $PROJECT_NAME"
+          echo "版本号: ${{ inputs.version }}"
+          echo "环境: ${{ inputs.env }}"
+          echo "状态: ${{ inputs.status }}"
+          echo "部署时间: $TIMESTAMP"
+          if [ -n "${{ inputs.preview_url }}" ]; then
+            echo "预览地址: ${{ inputs.preview_url }}"
+          fi 

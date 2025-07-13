@@ -24,7 +24,7 @@ on:
         default: "dist"
 
     # secrets:
-    #   QYWX_WEBHOOK:
+    #   WEBHOOK_QYWX:
     #     required: true
 
 jobs:
