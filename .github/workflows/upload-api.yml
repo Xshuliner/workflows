@@ -125,6 +125,47 @@ jobs:
           rm: ${{ inputs.rm }}
           strip_components: ${{ inputs.strip_components }}
 
+      - name: Deploy and Restart with PM2
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          port: ${{ secrets.SSH_PORT }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd ${{ steps.repo.outputs.repository_path }}
+            yarn install
+
+            # 确保 pm2 已安装
+            if ! command -v pm2 >/dev/null 2>&1; then
+              echo "pm2 未安装，正在全局安装 pm2..."
+              yarn global add pm2
+            fi
+
+            # 根据环境删除并启动对应 pm2 进程
+            if [ "${{ inputs.env }}" = "prod" ]; then
+              if pm2 list | grep -q smartProd; then
+                echo "删除已存在的 smartProd 进程 start"
+                pm2 delete smartProd
+                echo "删除已存在的 smartProd 进程 done"
+              fi
+              echo "启动 smartProd 进程 start"
+              pm2 start npm --name smartProd -- run start:prod
+              echo "启动 smartProd 进程 done"
+            else
+              if pm2 list | grep -q smartUat; then
+                echo "删除已存在的 smartUat 进程 start"
+                pm2 delete smartUat
+                echo "删除已存在的 smartUat 进程 done"
+              fi
+              echo "启动 smartUat 进程 start"
+              pm2 start npm --name smartUat -- run start:uat
+              echo "启动 smartUat 进程 done"
+            fi
+
+            pm2 save
+            pm2 startup
+
       - name: Console Url
         run: |
           TIMESTAMP=$(date +%s)
