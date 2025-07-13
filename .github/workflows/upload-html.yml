@@ -77,20 +77,20 @@ jobs:
 
           if [ "${{ github.repository }}" = "Xshuliner/project-pages" ] && [ "${{ inputs.env }}" = "prod" ]; then
             REPO_PATH="${{ secrets.SERVER_HTML }}"
-            REPO_URL="https://www.xshuliner.online"
+            PREVIEW_URL="https://www.xshuliner.online"
           else
             if [ "${{ inputs.env }}" = "prod" ]; then
               REPO_PATH="${{ secrets.SERVER_HTML }}/$REPO_NAME"
-              REPO_URL="https://www.xshuliner.online/$REPO_NAME"
+              PREVIEW_URL="https://www.xshuliner.online/$REPO_NAME"
             else
               REPO_PATH="${{ secrets.SERVER_HTML }}/${{ inputs.env }}/$REPO_NAME"
-              REPO_URL="https://www.xshuliner.online/${{ inputs.env }}/$REPO_NAME"
+              PREVIEW_URL="https://www.xshuliner.online/${{ inputs.env }}/$REPO_NAME"
             fi
           fi
 
           echo "repository_name=$REPO_NAME" >> $GITHUB_OUTPUT
           echo "repository_path=$REPO_PATH" >> $GITHUB_OUTPUT
-          echo "repository_url=$REPO_URL" >> $GITHUB_OUTPUT
+          echo "preview_url=$PREVIEW_URL" >> $GITHUB_OUTPUT
 
       - name: Console params
         run: |
@@ -105,7 +105,7 @@ jobs:
           echo "=== [Console params][secrets] SSH_KEY: ${{ secrets.SSH_KEY }} ==="
           echo "=== [Console params][outputs] repository_name: ${{ steps.repo.outputs.repository_name }} ==="
           echo "=== [Console params][outputs] repository_path: ${{ steps.repo.outputs.repository_path }} ==="
-          echo "=== [Console params][outputs] repository_url: ${{ steps.repo.outputs.repository_url }} ==="
+          echo "=== [Console params][outputs] preview_url: ${{ steps.repo.outputs.preview_url }} ==="
 
           echo "======"
 
@@ -124,7 +124,7 @@ jobs:
       - name: Console Url
         run: |
           TIMESTAMP=$(date +%s)
-          echo "=== [Console Url]: ${{ steps.repo.outputs.repository_url }}?t=$TIMESTAMP ==="
+          echo "=== [Console Url]: ${{ steps.repo.outputs.preview_url }}?t=$TIMESTAMP ==="
 
       - name: Report API for success
         if: inputs.env == 'prod'
@@ -145,7 +145,13 @@ jobs:
               -H 'platform: WEB' \
               --data-raw '{
                 "projectName": "'${{ steps.repo.outputs.repository_name }}'",
-                "content": "[{\"version\":\"${{ inputs.version }}\",\"url\":\"${{ steps.repo.outputs.repository_url }}\"}]"
+                "version": "'${{ inputs.version }}'",
+                "repositoryUrl": "'${{ github.server_url }}/${{ github.repository }}'",
+                "previewUrl": "'${{ steps.repo.outputs.preview_url }}'",
+                "ref": "${{ github.ref }}",
+                "sha": "${{ github.sha }}",
+                "actor": "${{ github.actor }}",
+                "content": "{}"
               }')
             
             # 分离响应内容和状态码
@@ -200,7 +206,7 @@ jobs:
                 },
                 {
                   "keyname": "预览地址",
-                  "value": "${{ steps.repo.outputs.repository_url }}"
+                  "value": "${{ steps.repo.outputs.preview_url }}"
                 },
                 {
                   "keyname": "部署时间",
@@ -211,12 +217,12 @@ jobs:
                 {
                   "type": 1,
                   "title": "查看预览",
-                  "url": "${{ steps.repo.outputs.repository_url }}"
+                  "url": "${{ steps.repo.outputs.preview_url }}"
                 }
               ],
               "card_action": {
                 "type": 1,
-                "url": "${{ steps.repo.outputs.repository_url }}"
+                "url": "${{ steps.repo.outputs.preview_url }}"
               }
             }
           }'
