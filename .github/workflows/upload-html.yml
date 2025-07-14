@@ -17,6 +17,12 @@ on:
         type: string
         default: "--"
 
+      download_dist_name:
+        description: "download dist name"
+        required: true
+        type: string
+        default: "artifacts_name"
+
       repository_name:
         description: "Repository name"
         required: false
@@ -34,12 +40,6 @@ on:
         required: false
         type: number
         default: 1
-
-      download_dist_name:
-        description: "download dist name"
-        required: false
-        type: string
-        default: "dist"
 
     outputs:
       preview_url:

@@ -31,7 +31,7 @@ on:
 
       third_type:
         description: "Third party notification types (qywx, feishu, dingtalk, teams)"
-        required: true
+        required: false
         type: string
         default: "qywx"
 

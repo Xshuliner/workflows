@@ -11,17 +11,17 @@ on:
         type: string
         default: "--"
 
-      repository_name:
-        description: "Repository name"
-        required: false
-        type: string
-        default: ""
-
       download_dist_name:
         description: "download dist name"
         required: true
         type: string
         default: "dist"
+
+      repository_name:
+        description: "Repository name"
+        required: false
+        type: string
+        default: ""
 
     # secrets:
     #   WEBHOOK_QYWX:
@@ -45,7 +45,7 @@ jobs:
           DOWNLOAD_DIST_NAME="${REPO_NAME}_${TIMESTAMP}"
 
           echo "zip_name=$DOWNLOAD_DIST_NAME" >> $GITHUB_OUTPUT
-      
+
       - name: Download previous artifacts
         uses: actions/download-artifact@v4
         with:
@@ -75,6 +75,7 @@ jobs:
             - **Version**: ${{ inputs.version }}
             - **Branch**: ${{ github.ref_name }}
             - **Commit**: ${{ github.sha }}
+            - **Actor**: ${{ github.actor }}
             - **Build Time**: ${{ steps.repo.outputs.zip_name }}
             - **Artifact Name**: ${{ steps.repo.outputs.zip_name }}.zip
 

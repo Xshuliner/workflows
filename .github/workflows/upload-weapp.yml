@@ -1,6 +1,6 @@
-name: Upload Api
+name: Upload Weapp
 
-run-name: Upload Api
+run-name: Upload Weapp
 
 on:
   workflow_call:
@@ -23,29 +23,27 @@ on:
         type: string
         default: "artifacts_name"
 
+      app_id:
+        description: "Weapp AppId"
+        required: true
+        type: string
+        
+      private_key:
+        description: "Weapp Private Key"
+        required: true
+        type: string
+
       repository_name:
         description: "Repository name"
         required: false
         type: string
         default: ""
 
-      code_path:
-        description: "Code path"
+      desc:
+        description: "Desc"
         required: false
         type: string
         default: ""
-
-      rm:
-        description: "rm for scp params"
-        required: false
-        type: boolean
-        default: true
-
-      strip_components:
-        description: "strip_components for scp params"
-        required: false
-        type: number
-        default: 1
 
     outputs:
       preview_url:
@@ -54,18 +52,6 @@ on:
       repository_path:
         description: "Repository path on server"
         value: ${{ jobs.upload.outputs.repository_path }}
-
-    secrets:
-      SSH_HOST:
-        required: true
-      SSH_PORT:
-        required: true
-      SSH_USERNAME:
-        required: true
-      SSH_KEY:
-        required: true
-      SERVER_API:
-        required: true
 
 jobs:
   upload:
@@ -90,12 +76,12 @@ jobs:
             REPO_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2)
           fi
 
-          REPO_PATH="${{ secrets.SERVER_API }}/${{ inputs.env }}/$REPO_NAME"
-
           if [ "${{ inputs.env }}" = "prod" ]; then
-            PREVIEW_URL="https://www.xshuliner.online/api/smart/swagger"
+            REPO_PATH=""
+            PREVIEW_URL="https://www.xshuliner.online/$REPO_NAME"
           else
-            PREVIEW_URL="https://www.xshuliner.online/apiuat/smart/swagger"
+            REPO_PATH=""
+            PREVIEW_URL="https://www.xshuliner.online/${{ inputs.env }}/$REPO_NAME"
           fi
 
           echo "repository_name=$REPO_NAME" >> $GITHUB_OUTPUT
@@ -106,8 +92,6 @@ jobs:
         run: |
           echo "=== [Console params][params] env: ${{ inputs.env }} ==="
           echo "=== [Console params][params] repository_name: ${{ inputs.repository_name }} ==="
-          echo "=== [Console params][params] rm: ${{ inputs.rm }} ==="
-          echo "=== [Console params][params] strip_components: ${{ inputs.strip_components }} ==="
           echo "=== [Console params][params] download_dist_name: ${{ inputs.download_dist_name }} ==="
           echo "=== [Console params][secrets] SSH_HOST: ${{ secrets.SSH_HOST }} ==="
           echo "=== [Console params][secrets] SSH_PORT: ${{ secrets.SSH_PORT }} ==="
@@ -119,59 +103,32 @@ jobs:
 
           echo "======"
 
+      - name: Prepare desc
+        id: desc
+        run: |
+          DESC="**Commit**: ${{ github.sha }}"
+          DESC="$DESC\n**Branch**: ${{ github.ref_name }}"
+          DESC="$DESC\n**Actor**: ${{ github.actor }}"
+          DESC="$DESC\n${{ inputs.desc }}"
+          echo "DESC_WITH_INFO<<EOF" >> $GITHUB_ENV
+          echo -e "$DESC" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Write private.key
+        run: |
+          echo "${{ inputs.private_key }}" > private.key
+
       - name: Upload files
-        uses: appleboy/scp-action@master
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          port: ${{ secrets.SSH_PORT }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_KEY }}
-          source: dist/
-          target: ${{ steps.repo.outputs.repository_path }}
-          rm: ${{ inputs.rm }}
-          strip_components: ${{ inputs.strip_components }}
-
-      - name: Deploy and Restart with PM2
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          port: ${{ secrets.SSH_PORT }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_KEY }}
-          script: |
-            cd ${{ steps.repo.outputs.repository_path }}${{ inputs.code_path }}
-
-            yarn install
-
-            # 确保 pm2 已安装
-            if ! command -v pm2 >/dev/null 2>&1; then
-              echo "pm2 未安装，正在全局安装 pm2..."
-              yarn global add pm2
-            fi
-
-            # 根据环境删除并启动对应 pm2 进程
-            if [ "${{ inputs.env }}" = "prod" ]; then
-              if pm2 list | grep -q smartProd; then
-                echo "删除已存在的 smartProd 进程 start"
-                pm2 delete smartProd
-                echo "删除已存在的 smartProd 进程 done"
-              fi
-              echo "启动 smartProd 进程 start"
-              pm2 start npm --name smartProd -- run start:prod
-              echo "启动 smartProd 进程 done"
-            else
-              if pm2 list | grep -q smartUat; then
-                echo "删除已存在的 smartUat 进程 start"
-                pm2 delete smartUat
-                echo "删除已存在的 smartUat 进程 done"
-              fi
-              echo "启动 smartUat 进程 start"
-              pm2 start npm --name smartUat -- run start:uat
-              echo "启动 smartUat 进程 done"
-            fi
-
-            pm2 save --force
-            pm2 startup
+        env:
+          app_id: ${{ inputs.app_id }}
+        run: |
+          npx miniprogram-ci upload \
+            --project-path dist/ \
+            --appid $app_id \
+            --private-key-path ./private.key \
+            --type miniProgram \
+            --version ${{ inputs.version }} \
+            --desc "${DESC_WITH_INFO}"
 
       - name: Console Url
         run: |
