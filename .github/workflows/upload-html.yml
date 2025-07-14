@@ -17,14 +17,14 @@ on:
         type: string
         default: "--"
 
-      download_dist_name:
-        description: "download dist name"
+      download_artifact_name:
+        description: "Download artifact name"
         required: true
         type: string
-        default: "artifacts_name"
+        default: "artifact_name"
 
-      repository_name:
-        description: "Repository name"
+      project_name:
+        description: "Project name"
         required: false
         type: string
         default: ""
@@ -72,14 +72,14 @@ jobs:
       - name: Download previous artifacts
         uses: actions/download-artifact@v4
         with:
-          name: ${{ inputs.download_dist_name }}
+          name: ${{ inputs.download_artifact_name }}
           path: dist/
 
       - name: Get repository name
         id: repo
         run: |
-          if [ -n "${{ inputs.repository_name }}" ]; then
-            REPO_NAME="${{ inputs.repository_name }}"
+          if [ -n "${{ inputs.project_name }}" ]; then
+            REPO_NAME="${{ inputs.project_name }}"
           else
             REPO_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2)
           fi
@@ -97,22 +97,22 @@ jobs:
             fi
           fi
 
-          echo "repository_name=$REPO_NAME" >> $GITHUB_OUTPUT
+          echo "project_name=$REPO_NAME" >> $GITHUB_OUTPUT
           echo "repository_path=$REPO_PATH" >> $GITHUB_OUTPUT
           echo "preview_url=$PREVIEW_URL" >> $GITHUB_OUTPUT
 
       - name: Console params
         run: |
           echo "=== [Console params][params] env: ${{ inputs.env }} ==="
-          echo "=== [Console params][params] repository_name: ${{ inputs.repository_name }} ==="
+          echo "=== [Console params][params] project_name: ${{ inputs.project_name }} ==="
           echo "=== [Console params][params] rm: ${{ inputs.rm }} ==="
           echo "=== [Console params][params] strip_components: ${{ inputs.strip_components }} ==="
-          echo "=== [Console params][params] download_dist_name: ${{ inputs.download_dist_name }} ==="
+          echo "=== [Console params][params] download_artifact_name: ${{ inputs.download_artifact_name }} ==="
           echo "=== [Console params][secrets] SSH_HOST: ${{ secrets.SSH_HOST }} ==="
           echo "=== [Console params][secrets] SSH_PORT: ${{ secrets.SSH_PORT }} ==="
           echo "=== [Console params][secrets] SSH_USERNAME: ${{ secrets.SSH_USERNAME }} ==="
           echo "=== [Console params][secrets] SSH_KEY: ${{ secrets.SSH_KEY }} ==="
-          echo "=== [Console params][outputs] repository_name: ${{ steps.repo.outputs.repository_name }} ==="
+          echo "=== [Console params][outputs] project_name: ${{ steps.repo.outputs.project_name }} ==="
           echo "=== [Console params][outputs] repository_path: ${{ steps.repo.outputs.repository_path }} ==="
           echo "=== [Console params][outputs] preview_url: ${{ steps.repo.outputs.preview_url }} ==="
 
@@ -153,7 +153,7 @@ jobs:
               -H 'brand: page' \
               -H 'platform: WEB' \
               --data-raw '{
-                "projectName": "'${{ steps.repo.outputs.repository_name }}'",
+                "projectName": "'${{ steps.repo.outputs.project_name }}'",
                 "version": "'${{ inputs.version }}'",
                 "repositoryUrl": "'${{ github.server_url }}/${{ github.repository }}'",
                 "previewUrl": "'${{ steps.repo.outputs.preview_url }}'",

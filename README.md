@@ -58,8 +58,8 @@
 
 **主要参数**：
 - `version`：版本号（通常为 tag）
-- `repository_name`：可选，仓库名
-- `download_dist_name`：产物目录名
+- `project_name`：可选，项目名
+- `download_artifact_name`：产物目录名
 
 ---
 
@@ -70,10 +70,10 @@
 **主要参数**：
 - `env`：环境类型（prod/uat）
 - `version`：版本号
-- `repository_name`：可选，仓库名
+- `project_name`：可选，项目名
 - `rm`：上传前是否清空目标目录
 - `strip_components`：上传时去除的目录层级
-- `download_dist_name`：产物目录名
+- `download_artifact_name`：产物目录名
 
 **Secrets**：
 - `SSH_HOST`、`SSH_PORT`、`SSH_USERNAME`、`SSH_KEY`、`SERVER_HTML`（服务器信息）
