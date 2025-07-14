@@ -126,10 +126,18 @@ jobs:
               ;;
           esac
           
+          # 新增action发起者、sha、分支
+          ACTOR="${{ github.actor }}"
+          GITHUB_SHA="${{ github.sha }}"
+          GITHUB_REF="${{ github.ref }}"
+          
           echo "TIMESTAMP=$TIMESTAMP" >> $GITHUB_ENV
           echo "PROJECT_NAME=$PROJECT_NAME" >> $GITHUB_ENV
           echo "STATUS_EMOJI=$STATUS_EMOJI" >> $GITHUB_ENV
           echo "STATUS_TEXT=$STATUS_TEXT" >> $GITHUB_ENV
+          echo "ACTOR=$ACTOR" >> $GITHUB_ENV
+          echo "GITHUB_SHA=$GITHUB_SHA" >> $GITHUB_ENV
+          echo "GITHUB_REF=$GITHUB_REF" >> $GITHUB_ENV
 
       - name: Notify QYWX
         if: contains(inputs.third_type, 'qywx')
@@ -167,6 +175,18 @@ jobs:
                 {
                   "keyname": "部署时间",
                   "value": "'$TIMESTAMP'"
+                },
+                {
+                  "keyname": "发起者",
+                  "value": "'$ACTOR'"
+                },
+                {
+                  "keyname": "Commit SHA",
+                  "value": "'$GITHUB_SHA'"
+                },
+                {
+                  "keyname": "分支",
+                  "value": "'$GITHUB_REF'"
                 }
                 '$([ -n "${{ inputs.preview_url }}" ] && echo ',
                 {
@@ -225,7 +245,14 @@ jobs:
                   "tag": "div",
                   "text": {
                     "tag": "lark_md",
-                    "content": "**项目名称：**'$PROJECT_NAME'\\n**版本号：**${{ inputs.version }}\\n**环境：**${{ inputs.env }}\\n**状态：**'$STATUS_TEXT'\\n**部署时间：**'$TIMESTAMP'"
+                    "content": "**项目名称：**'$PROJECT_NAME'\\n"\
+                      "**版本号：**${{ inputs.version }}\\n"\
+                      "**环境：**${{ inputs.env }}\\n"\
+                      "**状态：**'$STATUS_TEXT'\\n"\
+                      "**部署时间：**'$TIMESTAMP'\\n"\
+                      "**发起者：**'$ACTOR'\\n"\
+                      "**Commit SHA：**'$GITHUB_SHA'\\n"\
+                      "**分支：**'$GITHUB_REF'"
                   }
                 }'$([ -n "${{ inputs.preview_url }}" ] && echo ',
                 {
@@ -264,7 +291,17 @@ jobs:
             "msgtype": "markdown",
             "markdown": {
               "title": "'$STATUS_EMOJI' '$PROJECT_NAME' 部署通知",
-              "text": "## '$STATUS_EMOJI' '$PROJECT_NAME' 部署通知\\n\\n**项目名称：**'$PROJECT_NAME'\\n**版本号：**${{ inputs.version }}\\n**环境：**${{ inputs.env }}\\n**状态：**'$STATUS_TEXT'\\n**部署时间：**'$TIMESTAMP'\\n**仓库地址：**[${{ github.repository }}](${{ github.server_url }}/${{ github.repository }})'$([ -n "${{ inputs.preview_url }}" ] && echo '\\n**预览地址：**[${{ inputs.preview_url }}](${{ inputs.preview_url }})' || echo '')'"
+              "text": "## '$STATUS_EMOJI' '$PROJECT_NAME' 部署通知\\n\\n"\
+                "**项目名称：**'$PROJECT_NAME'\\n"\
+                "**版本号：**${{ inputs.version }}\\n"\
+                "**环境：**${{ inputs.env }}\\n"\
+                "**状态：**'$STATUS_TEXT'\\n"\
+                "**部署时间：**'$TIMESTAMP'\\n"\
+                "**发起者：**'$ACTOR'\\n"\
+                "**Commit SHA：**'$GITHUB_SHA'\\n"\
+                "**分支：**'$GITHUB_REF'\\n"\
+                "**仓库地址：**[${{ github.repository }}](${{ github.server_url }}/${{ github.repository }})"\
+                '$([ -n "${{ inputs.preview_url }}" ] && echo '\\n**预览地址：**[${{ inputs.preview_url }}](${{ inputs.preview_url }})' || echo '')'
             },
             "at": {
               "isAtAll": false
@@ -314,6 +351,18 @@ jobs:
                   {
                     "name": "部署时间",
                     "value": "'$TIMESTAMP'"
+                  },
+                  {
+                    "name": "发起者",
+                    "value": "'$ACTOR'"
+                  },
+                  {
+                    "name": "Commit SHA",
+                    "value": "'$GITHUB_SHA'"
+                  },
+                  {
+                    "name": "分支",
+                    "value": "'$GITHUB_REF'"
                   }'$([ -n "${{ inputs.preview_url }}" ] && echo ',
                   {
                     "name": "预览地址",
