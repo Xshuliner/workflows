@@ -98,13 +98,13 @@ jobs:
         run: |
           # 获取东八区时间
           TIMESTAMP=$(TZ='Asia/Shanghai' date '+%Y-%m-%d %H:%M:%S')
-          
+
           # 设置项目名称
           PROJECT_NAME="${{ inputs.project_name }}"
           if [ -z "$PROJECT_NAME" ]; then
             PROJECT_NAME="${{ github.repository }}"
           fi
-          
+
           # 设置状态相关变量
           STATUS="${{ inputs.status }}"
           case $STATUS in
@@ -125,12 +125,12 @@ jobs:
               STATUS_TEXT="部署通知"
               ;;
           esac
-          
+
           # 新增action发起者、sha、分支
           ACTOR="${{ github.actor }}"
           GITHUB_SHA="${{ github.sha }}"
           GITHUB_REF="${{ github.ref }}"
-          
+
           echo "TIMESTAMP=$TIMESTAMP" >> $GITHUB_ENV
           echo "PROJECT_NAME=$PROJECT_NAME" >> $GITHUB_ENV
           echo "STATUS_EMOJI=$STATUS_EMOJI" >> $GITHUB_ENV
@@ -152,7 +152,7 @@ jobs:
             "template_card": {
               "card_type": "text_notice",
               "source": {
-                "icon_url": "https://cdn.jsdelivr.net/gh/gengjian1203/oss@master/Xshuliner/common/logo.jpg",
+                "icon_url": "https://www.xshuliner.online/oss/common/logo.jpg",
                 "desc": "'$STATUS_TEXT'"
               },
               "main_title": {
@@ -188,11 +188,6 @@ jobs:
                   "keyname": "分支",
                   "value": "'$GITHUB_REF'"
                 }
-                '$([ -n "${{ inputs.preview_url }}" ] && echo ',
-                {
-                  "keyname": "预览地址",
-                  "value": "${{ inputs.preview_url }}"
-                }' || echo '')'
               ],
               "jump_list": [
                 {
@@ -412,4 +407,4 @@ jobs:
           echo "部署时间: $TIMESTAMP"
           if [ -n "${{ inputs.preview_url }}" ]; then
             echo "预览地址: ${{ inputs.preview_url }}"
-          fi 
+          fi
