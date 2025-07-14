@@ -33,7 +33,7 @@ on:
         description: "Third party notification types (qywx, feishu, dingtalk, teams)"
         required: false
         type: string
-        default: "qywx"
+        default: ""
 
       status:
         description: "Deployment status (success, failure, warning)"
