@@ -23,16 +23,6 @@ on:
         type: string
         default: "artifact_name"
 
-      app_id:
-        description: "Weapp AppId"
-        required: true
-        type: string
-        
-      private_key:
-        description: "Weapp Private Key"
-        required: true
-        type: string
-
       project_name:
         description: "Project name"
         required: false
@@ -52,6 +42,12 @@ on:
       repository_path:
         description: "Repository path on server"
         value: ${{ jobs.upload.outputs.repository_path }}
+
+    secrets:
+      WEAPP_APPID:
+        required: true
+      WEAPP_PRIVATE_KEY:
+        required: true
 
 jobs:
   upload:
@@ -94,13 +90,8 @@ jobs:
           echo "=== [Console params][params] project_name: ${{ inputs.project_name }} ==="
           echo "=== [Console params][params] version: ${{ inputs.version }} ==="
           echo "=== [Console params][params] download_artifact_name: ${{ inputs.download_artifact_name }} ==="
-          echo "=== [Console params][params] app_id: ${{ inputs.app_id }} ==="
-          echo "=== [Console params][params] private_key: ${{ inputs.private_key }} ==="
-          echo "=== [Console params][params] download_artifact_name: ${{ inputs.download_artifact_name }} ==="
-          echo "=== [Console params][secrets] SSH_HOST: ${{ secrets.SSH_HOST }} ==="
-          echo "=== [Console params][secrets] SSH_PORT: ${{ secrets.SSH_PORT }} ==="
-          echo "=== [Console params][secrets] SSH_USERNAME: ${{ secrets.SSH_USERNAME }} ==="
-          echo "=== [Console params][secrets] SSH_KEY: ${{ secrets.SSH_KEY }} ==="
+          echo "=== [Console params][secrets] WEAPP_APPID: ${{ secrets.WEAPP_APPID }} ==="
+          echo "=== [Console params][secrets] WEAPP_PRIVATE_KEY: ${{ secrets.WEAPP_PRIVATE_KEY }} ==="
           echo "=== [Console params][outputs] project_name: ${{ steps.repo.outputs.project_name }} ==="
           echo "=== [Console params][outputs] repository_path: ${{ steps.repo.outputs.repository_path }} ==="
           echo "=== [Console params][outputs] preview_url: ${{ steps.repo.outputs.preview_url }} ==="
@@ -120,15 +111,13 @@ jobs:
 
       - name: Write private.key
         run: |
-          echo "${{ inputs.private_key }}" > private.key
+          echo "${{ secrets.WEAPP_PRIVATE_KEY }}" > private.key
 
       - name: Upload files
-        env:
-          app_id: ${{ inputs.app_id }}
         run: |
           npx miniprogram-ci upload \
             --project-path dist/ \
-            --appid ${{ inputs.app_id }} \
+            --appid ${{ secrets.WEAPP_APPID }} \
             --private-key-path ./private.key \
             --type miniProgram \
             --version ${{ inputs.version }} \
