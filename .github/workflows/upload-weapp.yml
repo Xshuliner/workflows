@@ -92,6 +92,8 @@ jobs:
         run: |
           echo "=== [Console params][params] env: ${{ inputs.env }} ==="
           echo "=== [Console params][params] project_name: ${{ inputs.project_name }} ==="
+          echo "=== [Console params][params] version: ${{ inputs.version }} ==="
+          echo "=== [Console params][params] download_artifact_name: ${{ inputs.download_artifact_name }} ==="
           echo "=== [Console params][params] app_id: ${{ inputs.app_id }} ==="
           echo "=== [Console params][params] private_key: ${{ inputs.private_key }} ==="
           echo "=== [Console params][params] download_artifact_name: ${{ inputs.download_artifact_name }} ==="
