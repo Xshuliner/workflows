@@ -128,12 +128,14 @@ jobs:
 
       - name: Upload files
         run: |
+          # 去掉版本号前面的v
+          CLEAN_VERSION=$(echo "${{ inputs.version }}" | sed 's/^v//')
           npx miniprogram-ci upload \
             --project-path dist/ \
             --appid ${{ secrets.WEAPP_APPID }} \
             --private-key-path ./private.key \
             --type miniProgram \
-            --version ${{ inputs.version }} \
+            --version $CLEAN_VERSION \
             --desc "${{ inputs.desc }}" \
             --verbose
 
