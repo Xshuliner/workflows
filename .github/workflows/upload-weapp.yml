@@ -92,6 +92,8 @@ jobs:
         run: |
           echo "=== [Console params][params] env: ${{ inputs.env }} ==="
           echo "=== [Console params][params] project_name: ${{ inputs.project_name }} ==="
+          echo "=== [Console params][params] app_id: ${{ inputs.app_id }} ==="
+          echo "=== [Console params][params] private_key: ${{ inputs.private_key }} ==="
           echo "=== [Console params][params] download_artifact_name: ${{ inputs.download_artifact_name }} ==="
           echo "=== [Console params][secrets] SSH_HOST: ${{ secrets.SSH_HOST }} ==="
           echo "=== [Console params][secrets] SSH_PORT: ${{ secrets.SSH_PORT }} ==="
@@ -124,7 +126,7 @@ jobs:
         run: |
           npx miniprogram-ci upload \
             --project-path dist/ \
-            --appid $app_id \
+            --appid ${{ inputs.app_id }} \
             --private-key-path ./private.key \
             --type miniProgram \
             --version ${{ inputs.version }} \
