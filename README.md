@@ -1,6 +1,6 @@
 # workflows 公共工作流仓库
 
-本仓库收集并维护了多种常用的 GitHub Actions 工作流，适用于自动化版本号管理、构建发布、静态资源上传、以及多平台通知等场景。所有工作流均可被其他项目直接复用，极大提升自动化运维效率。
+本仓库收集并维护了多种常用的 GitHub Actions 工作流，适用于自动化版本号管理、构建发布、静态资源上传、API部署、小程序发布以及多平台通知等场景。所有工作流均可被其他项目直接复用，极大提升自动化运维效率。
 
 ---
 
@@ -12,8 +12,10 @@
   - [1. 自动递增版本号（auto-increment-tag.yml）](#1-自动递增版本号auto-increment-tagyml)
   - [2. 发布 Release（deploy-release.yml）](#2-发布-releasedeploy-releaseyml)
   - [3. 上传 HTML 静态资源（upload-html.yml）](#3-上传-html-静态资源upload-htmlyml)
-  - [4. 多平台通知（notify-third-party.yml）](#4-多平台通知notify-third-partyyml)
-- [示例](#示例)
+  - [4. 上传小程序（upload-weapp.yml）](#4-上传小程序upload-weappyml)
+  - [5. 上传 API（upload-api.yml）](#5-上传-apiupload-apiyml)
+  - [6. 多平台通知（notify-third-party.yml）](#6-多平台通知notify-third-partyyml)
+- [使用示例](#使用示例)
 - [Webhook 配置](#webhook-配置)
 - [常见问题](#常见问题)
 - [贡献与许可](#贡献与许可)
@@ -25,6 +27,8 @@
 - **自动递增版本号**：支持主版本、功能、修复递增，自动打 tag，可选同步 package.json。
 - **自动发布 Release**：自动打包构建产物并发布到 GitHub Release。
 - **静态资源上传**：支持通过 SCP 上传 HTML 资源到服务器，并自动生成预览链接。
+- **小程序发布**：支持微信小程序代码上传，自动生成预览二维码。
+- **API 部署**：支持 API 服务部署到服务器，自动生成 Swagger 文档链接。
 - **多平台通知**：支持企业微信、飞书、钉钉、Teams 等多平台消息通知，支持多平台并发推送。
 
 ---
@@ -84,7 +88,51 @@
 
 ---
 
-### 4. 多平台通知（notify-third-party.yml）
+### 4. 上传小程序（upload-weapp.yml）
+
+**功能**：将构建好的小程序代码上传到微信开发者平台，支持自动生成预览二维码。
+
+**主要参数**：
+- `env`：环境类型（prod/uat）
+- `version`：版本号
+- `download_artifact_name`：产物目录名
+- `app_id`：小程序 AppId
+- `private_key`：小程序私钥
+- `project_name`：可选，项目名
+- `desc`：可选，上传描述
+
+**Secrets**：
+- `SSH_HOST`、`SSH_PORT`、`SSH_USERNAME`、`SSH_KEY`（服务器信息）
+
+**输出**：
+- `preview_url`：预览链接
+- `repository_path`：服务器路径
+
+---
+
+### 5. 上传 API（upload-api.yml）
+
+**功能**：将构建好的 API 服务部署到服务器，自动生成 Swagger 文档链接。
+
+**主要参数**：
+- `env`：环境类型（prod/uat）
+- `version`：版本号
+- `download_artifact_name`：产物目录名
+- `project_name`：可选，项目名
+- `code_path`：可选，代码路径
+- `rm`：上传前是否清空目标目录
+- `strip_components`：上传时去除的目录层级
+
+**Secrets**：
+- `SSH_HOST`、`SSH_PORT`、`SSH_USERNAME`、`SSH_KEY`、`SERVER_API`（服务器信息）
+
+**输出**：
+- `preview_url`：Swagger 文档链接
+- `repository_path`：服务器路径
+
+---
+
+### 6. 多平台通知（notify-third-party.yml）
 
 **功能**：支持企业微信、飞书、钉钉、Teams 多平台消息通知，支持多平台并发推送，支持自定义通知内容和状态。
 
@@ -101,11 +149,9 @@
 
 ---
 
-## 示例
+## 使用示例
 
-详见 [`examples/deploy-with-notify.yml`](examples/deploy-with-notify.yml) 和 [`examples/test-notify.yml`](examples/test-notify.yml)。
-
-**多平台通知示例**：
+### 多平台通知示例
 
 ```yaml
 - name: Notify deployment
@@ -122,6 +168,47 @@
     WEBHOOK_FEISHU: ${{ secrets.WEBHOOK_FEISHU }}
     WEBHOOK_DINGTALK: ${{ secrets.WEBHOOK_DINGTALK }}
     WEBHOOK_TEAMS: ${{ secrets.WEBHOOK_TEAMS }}
+```
+
+### 小程序上传示例
+
+```yaml
+- name: Upload Weapp
+  uses: ./.github/workflows/upload-weapp.yml
+  with:
+    env: "prod"
+    version: "v1.0.0"
+    download_artifact_name: "weapp-dist"
+    app_id: "wx1234567890abcdef"
+    private_key: "your-private-key"
+    project_name: "我的小程序"
+    desc: "版本更新"
+  secrets:
+    SSH_HOST: ${{ secrets.SSH_HOST }}
+    SSH_PORT: ${{ secrets.SSH_PORT }}
+    SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
+    SSH_KEY: ${{ secrets.SSH_KEY }}
+```
+
+### API 部署示例
+
+```yaml
+- name: Upload API
+  uses: ./.github/workflows/upload-api.yml
+  with:
+    env: "prod"
+    version: "v1.0.0"
+    download_artifact_name: "api-dist"
+    project_name: "我的API"
+    code_path: "src"
+    rm: true
+    strip_components: 1
+  secrets:
+    SSH_HOST: ${{ secrets.SSH_HOST }}
+    SSH_PORT: ${{ secrets.SSH_PORT }}
+    SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
+    SSH_KEY: ${{ secrets.SSH_KEY }}
+    SERVER_API: ${{ secrets.SERVER_API }}
 ```
 
 ---
@@ -252,11 +339,6 @@ curl -H 'Content-Type: application/json' \
      https://xxxxx.webhook.office.com/webhookb2/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx@xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/IncomingWebhook/xxxxxxxx/xxxxxxxx
 ```
 
-### 使用GitHub Actions测试
-1. 在仓库中运行测试workflow：`examples/test-notify.yml`
-2. 选择要测试的平台和状态
-3. 检查是否收到通知消息
-
 ## 常见问题
 
 - **消息未收到？** 检查 webhook 地址、机器人是否在群、Secrets 是否配置正确。
@@ -301,7 +383,7 @@ curl -H 'Content-Type: application/json' \
 - [企业微信机器人文档](https://developer.work.weixin.qq.com/document/path/91770)
 - [飞书机器人文档](https://open.feishu.cn/document/ukTMukTMukTM/ucTM5YjL3ETO24yNxkjN)
 - [钉钉机器人文档](https://open.dingtalk.com/document/robots/custom-robot-access)
-- [Teams Incoming Webhook文档](https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook) 
+- [Teams Incoming Webhook文档](https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook)
 
 ---
 
@@ -310,4 +392,4 @@ curl -H 'Content-Type: application/json' \
 - 欢迎提交 Issue 和 PR 共同完善本仓库。
 - 代码遵循 MIT License。
 
-如需更多帮助，请查阅各 workflow 文件头部注释、示例文件和文档目录。
+如需更多帮助，请查阅各 workflow 文件头部注释和文档说明。
