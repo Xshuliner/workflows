@@ -113,6 +113,19 @@ jobs:
         run: |
           echo "${{ secrets.WEAPP_PRIVATE_KEY }}" > private.key
 
+      - name: Debug Info
+        run: |
+          echo "NODE VERSION:"
+          node -v
+          echo "NPM VERSION:"
+          npm -v
+          echo "PWD:"
+          pwd
+          echo "DIST DIR:"
+          ls -l dist/ || echo "dist/ not found"
+          echo "PRIVATE KEY:"
+          ls -l ./private.key || echo "private.key not found"
+
       - name: Upload files
         run: |
           npx miniprogram-ci upload \
@@ -121,7 +134,8 @@ jobs:
             --private-key-path ./private.key \
             --type miniProgram \
             --version ${{ inputs.version }} \
-            --desc "${DESC_WITH_INFO}"
+            --desc "${{ inputs.desc }}" \
+            --verbose
 
       - name: Console Url
         run: |
