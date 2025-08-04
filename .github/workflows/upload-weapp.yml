@@ -105,7 +105,8 @@ jobs:
           DESC="$DESC\n**Branch**: ${{ github.ref_name }}"
           DESC="$DESC\n**Actor**: ${{ github.actor }}"
           DESC="$DESC\n${{ inputs.desc }}"
-          echo "DESC_WITH_INFO<<EOF" >> $GITHUB_ENV
+          # echo "DESC_WITH_INFO<<EOF" >> $GITHUB_ENV
+          echo "DESC<<EOF" >> $GITHUB_ENV
           echo -e "$DESC" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
 
@@ -130,6 +131,7 @@ jobs:
         run: |
           # 去掉版本号前面的v
           CLEAN_VERSION=$(echo "${{ inputs.version }}" | sed 's/^v//')
+
           npx miniprogram-ci upload \
             --appid ${{ secrets.WEAPP_APPID }} \
             --project-path dist/ \
@@ -139,7 +141,7 @@ jobs:
             --use-cos false \
             --robot 30 \
             --upload-version $CLEAN_VERSION \
-            --upload-description "${{ steps.desc.outputs.DESC_WITH_INFO }}" \
+            --upload-description "${{ steps.desc.outputs.DESC }}" \
             --verbose
 
       - name: Console Url
