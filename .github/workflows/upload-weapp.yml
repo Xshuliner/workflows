@@ -98,18 +98,6 @@ jobs:
 
           echo "======"
 
-      - name: Prepare desc
-        id: desc
-        run: |
-          DESC="**Commit**: ${{ github.sha }}"
-          DESC="$DESC\n**Branch**: ${{ github.ref_name }}"
-          DESC="$DESC\n**Actor**: ${{ github.actor }}"
-          DESC="$DESC\n${{ inputs.desc }}"
-          # echo "DESC_WITH_INFO<<EOF" >> $GITHUB_ENV
-          echo "DESC<<EOF" >> $GITHUB_ENV
-          echo -e "$DESC" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
-
       - name: Write private.key
         run: |
           echo "${{ secrets.WEAPP_PRIVATE_KEY }}" > private.key
@@ -141,7 +129,7 @@ jobs:
             --use-cos false \
             --robot 30 \
             --upload-version $CLEAN_VERSION \
-            --upload-description "${{ steps.desc.outputs.DESC }}" \
+            --upload-description "**Commit**: ${{ github.sha }} **Branch**: ${{ github.ref_name }} **Actor**: ${{ github.actor }} **Desc**: ${{ inputs.desc }}" \
             --verbose
 
       - name: Console Url
