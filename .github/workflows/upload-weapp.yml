@@ -131,12 +131,15 @@ jobs:
           # 去掉版本号前面的v
           CLEAN_VERSION=$(echo "${{ inputs.version }}" | sed 's/^v//')
           npx miniprogram-ci upload \
-            --project-path dist/ \
             --appid ${{ secrets.WEAPP_APPID }} \
+            --project-path dist/ \
             --private-key-path ./private.key \
-            --type miniProgram \
-            --version $CLEAN_VERSION \
-            --desc "${{ inputs.desc }}" \
+            --project-type miniProgram \
+            --threads 0 \
+            --use-cos false \
+            --robot 30 \
+            --upload-version $CLEAN_VERSION \
+            --upload-description "${{ steps.desc.outputs.DESC_WITH_INFO }}" \
             --verbose
 
       - name: Console Url
