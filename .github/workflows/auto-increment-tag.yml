@@ -17,18 +17,6 @@ on:
         type: string
         default: ""
 
-      version_feat_fixed:
-        description: "Fixed feat version number"
-        required: false
-        type: string
-        default: ""
-
-      version_fix_fixed:
-        description: "Fixed fix version number"
-        required: false
-        type: string
-        default: ""
-
       update_package_json_path:
         description: "Update package json path"
         required: false
@@ -59,23 +47,11 @@ on:
         type: string
         default: ""
 
-      version_feat_fixed:
-        description: "Fixed feat version number"
-        required: false
-        type: string
-        default: ""
-
-      version_fix_fixed:
-        description: "Fixed fix version number"
-        required: false
-        type: string
-        default: ""
-
       update_package_json_path:
-          description: "Update package json path"
-          required: false
-          type: string
-          default: ""
+        description: "Update package json path"
+        required: false
+        type: string
+        default: ""
 
 jobs:
   increment-tag:
@@ -92,12 +68,19 @@ jobs:
       - name: Get latest tag
         id: get_tag
         run: |
-          LATEST_TAG=$(git tag -l --sort=-v:refname | head -n 1)
-          if [ -z "$LATEST_TAG" ]; then
-            LATEST_TAG="v0.0.0"
+          if [ -n "${{ inputs.version_major_fixed }}" ]; then
+            MAJOR="${{ inputs.version_major_fixed }}"
+            LATEST_TAG=$(git tag -l "v${MAJOR}.*.*" --sort=-v:refname | head -n 1)
+            if [ -z "$LATEST_TAG" ]; then
+              LATEST_TAG="v${MAJOR}.0.0"
+            fi
+          else
+            LATEST_TAG=$(git tag -l --sort=-v:refname | head -n 1)
+            if [ -z "$LATEST_TAG" ]; then
+              LATEST_TAG="v0.0.0"
+            fi
           fi
           echo "latest_tag=$LATEST_TAG" >> $GITHUB_OUTPUT
-
           echo "=== [Get latest tag][result] LATEST_TAG: $LATEST_TAG ==="
 
       - name: Increment version
@@ -105,8 +88,6 @@ jobs:
         run: |
           echo "=== [Increment version][params] version_type: ${{ inputs.version_type }} ==="
           echo "=== [Increment version][params] version_major_fixed: ${{ inputs.version_major_fixed }} ==="
-          echo "=== [Increment version][params] version_feat_fixed: ${{ inputs.version_feat_fixed }} ==="
-          echo "=== [Increment version][params] version_fix_fixed: ${{ inputs.version_fix_fixed }} ==="
           echo "=== [Increment version][params] update_package_json_path: ${{ inputs.update_package_json_path }} ==="
 
           VERSION=$(echo ${{ steps.get_tag.outputs.latest_tag }} | sed 's/^v//;s/v//g')
@@ -129,29 +110,6 @@ jobs:
             FIX=$((FIX + 1))
             NEW_VERSION="v${MAJOR}.${FEAT}.${FIX}"
           fi
-
-          # 应用固定版本号覆盖
-          if [ -n "${{ inputs.version_major_fixed }}" ]; then
-            MAJOR_FIXED="${{ inputs.version_major_fixed }}"
-            echo "=== [Increment version][override] Using fixed major version: $MAJOR_FIXED ==="
-          fi
-          
-          if [ -n "${{ inputs.version_feat_fixed }}" ]; then
-            FEAT_FIXED="${{ inputs.version_feat_fixed }}"
-            echo "=== [Increment version][override] Using fixed feat version: $FEAT_FIXED ==="
-          fi
-          
-          if [ -n "${{ inputs.version_fix_fixed }}" ]; then
-            FIX_FIXED="${{ inputs.version_fix_fixed }}"
-            echo "=== [Increment version][override] Using fixed fix version: $FIX_FIXED ==="
-          fi
-
-          # 构建最终版本号，优先使用固定版本号
-          FINAL_MAJOR=${MAJOR_FIXED:-$MAJOR}
-          FINAL_FEAT=${FEAT_FIXED:-$FEAT}
-          FINAL_FIX=${FIX_FIXED:-$FIX}
-          
-          NEW_VERSION="v${FINAL_MAJOR}.${FINAL_FEAT}.${FINAL_FIX}"
 
           echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
 
