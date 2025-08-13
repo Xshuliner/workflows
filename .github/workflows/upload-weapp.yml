@@ -102,6 +102,15 @@ jobs:
         run: |
           echo "${{ secrets.WEAPP_PRIVATE_KEY }}" > private.key
 
+      - name: Write project.config.json
+        run: |
+          # Update appid in project.config.json
+          if [ -f "dist/project.config.json" ]; then
+            jq '.appid = "${{ secrets.WEAPP_APPID }}"' dist/project.config.json > tmp.json && mv tmp.json dist/project.config.json
+          else
+            echo "project.config.json not found in dist/"
+          fi
+
       - name: Debug Info
         run: |
           echo "NODE VERSION:"
@@ -112,8 +121,10 @@ jobs:
           pwd
           echo "DIST DIR:"
           ls -l dist/ || echo "dist/ not found"
-          echo "PRIVATE KEY:"
+          echo "./private.key:"
           ls -l ./private.key || echo "private.key not found"
+          echo "dist/project.config.json"
+          cat dist/project.config.json || echo "project.config.json not found"
 
       - name: Upload files
         run: |
